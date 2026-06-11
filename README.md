@@ -22,7 +22,7 @@ This document is the authoritative reference used to build, review, maintain, an
 ```
 index.html            Shell markup only; loads styles.css + js/main.js
 styles.css            All styling (extracted from the old <style> block)
-js/
+app/
   main.js             Entry point: binds sidebar controls, boots the app
   core/               Framework-agnostic helpers
     format.js         esc(), money, date helpers
