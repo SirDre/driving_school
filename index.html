@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Driving School Booking and Payments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <aside class="side">
+    <div class="brand">
+      <span class="plate">Group 6</span>
+      <div><b>DSBPS</b> </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Operations</div>
+      <button data-sec="customers" class="active"><span class="ic"></span> Customers</button>
+      <button data-sec="lessons"><span class="ic"></span> Lessons</button>
+      <div class="nav-label">Views</div>
+      <button data-sec="schedule"><span class="ic"></span> Schedule and staff</button>
+      <button data-sec="reports"><span class="ic"></span> Reports</button>
+    </nav>
+    <div class="side-foot">
+      <div class="conn">
+        <div class="row"><span class="dot red" id="connDot"></span><span id="connText">Disconnected</span></div>
+        <button id="connBtn">Connect to Supabase</button>
+      </div>
+      <div class="conn" style="margin-top:10px">
+        <div class="row"><span class="dot red" id="authDot"></span><span id="authText">Signed out</span></div>
+        <button id="signinBtn">Sign in</button>
+        <button id="registerBtn" style="margin-top:6px">Register</button>
+        <button id="rolesBtn" style="margin-top:6px; display:none">Roles</button>
+        <button id="logoutBtn" style="margin-top:6px; display:none">Logout</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="eyebrow" id="eyebrow">Operations</div>
+      <div class="head-row">
+        <div>
+          <h1 id="title">Customers</h1>
+          <div class="sub" id="subtitle"></div>
+        </div>
+        <div id="headAction"></div>
+      </div>
+      <div class="rule"></div>
+    </div>
+    <div class="content" id="view"></div>
+  </main>
+
+  <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+  <div class="toast" id="toast"><span class="tdot"></span><span id="toastMsg"></span></div>
+
+  <script type="module" src="./app/main.js"></script>
+</body>
+</html>

@@ -72,4 +72,4 @@ Requires the database side already set up:
 - Schema, views, and stored procedures
 - The `fn_*` wrappers and `fn_resolve_address`
 - The auth extension
-- `driving_school` added under **Settings → API → Exposed schemas**
+- Schema `driving_school`:- Supabase -> Settings -> API -> Exposed schemas 
