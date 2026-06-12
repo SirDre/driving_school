@@ -207,7 +207,6 @@ th {
 }
 
 .conn button {
-    all: unset;
     cursor: pointer;
     text-align: center;
     display: block;
@@ -217,7 +216,8 @@ th {
     font-size: 12px;
     font-weight: 600;
     padding: 8px;
-    border-radius: 6px;
+    border-radius: 10px;
+    border-color: #ffffff14;
 }
 
 .conn button:hover {
