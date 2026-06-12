@@ -27,6 +27,7 @@ function setHeader(eyebrow, title, sub) {
 }
 
 /* ---------------- Navigation ---------------- */
+// Set the current section, update nav button states, set the header, and refresh the view.
 export function setSection(sec) {
   if (!canAccessSection(sec)) {
     if (!getSession()) return renderAuthGate();
@@ -40,9 +41,12 @@ export function setSection(sec) {
 }
 
 // Re-render the current section, gating on connection/auth/role.
+
+// This is the main "refresh" function that all controllers call after they mutate data. 
 export async function refresh() {
   const v = $('view');
-  v.innerHTML = `<div class="card empty">Loading…</div>`;
+  v.innerHTML = '<div class="card empty">Loading…</div>';
+
   try {
     if (state.mode !== 'connected' || !state.sbClient) return renderConnectionGate();
     if (!getSession()) return renderAuthGate();
@@ -51,16 +55,20 @@ export async function refresh() {
     const mount = mounts[state.current];
     if (mount) await mount();
   } catch (e) {
-    v.innerHTML = `<div class="card empty"><b>Couldn't load data</b>${esc(e.message)}</div>`;
+    v.innerHTML = '<div class="card empty"><b>Couldn\'t load data</b>' + esc(e.message) + '</div>';
   }
 }
 
 /* ---------------- Gate screens ---------------- */
+
+// If the user isn't connected to Supabase, show this screen.
 function renderConnectionGate() {
   setHeader('Connection', 'Connect to Supabase', 'Enter your project settings to connect to Supabase.');
+
   $('view').innerHTML = connectionGateView();
 }
 
+// If the user isn't signed in, show this screen.  
 function renderAuthGate() {
   setHeader('Authentication', 'Sign in required', 'Connect to Supabase, then register or sign in with the built-in basic auth roles.');
 
@@ -69,6 +77,7 @@ function renderAuthGate() {
   $('gateRegister').onclick = () => openRegisterModal();
 }
 
+// If the user is signed in but doesn't have access to the current section, show this screen.
 function renderAccessDenied(section) {
   setHeader('Access', SECTIONS[section]?.title || 'Section', 'Your role does not permit this section.');
 
@@ -76,18 +85,21 @@ function renderAccessDenied(section) {
 }
 
 /* ---------------- App chrome (sidebar + nav) ---------------- */
+// Update the connection status indicator in the sidebar.
 export function setConn() {
   $('connDot').className = 'dot ' + (state.mode === 'connected' ? 'live' : 'red');
   $('connText').textContent = state.mode === 'connected' ? 'Connected' : 'Disconnected';
   $('connBtn').textContent = state.mode === 'connected' ? 'Disconnect' : 'Connect to Supabase';
 }
 
+// Enable/disable auth buttons based on session, and show user info if signed in.
 export function updateAuthUI() {
   const session = getSession();
   const signedIn = !!session;
+
   $('authDot').className = 'dot ' + (signedIn ? 'live' : 'red');
   $('authText').textContent = signedIn
-    ? 'Signed in as ' + (session.user.email || session.user.id) 
+    ? '${session.fullName || session.email} · ${(session.roles || []).join(", ") || "no role"}'
     : 'Signed out';
   $('signinBtn').style.display = signedIn ? 'none' : 'block';
   $('registerBtn').style.display = signedIn ? 'none' : 'block';
@@ -95,6 +107,7 @@ export function updateAuthUI() {
   $('logoutBtn').style.display = signedIn ? 'block' : 'none';
 }
 
+// Enable/disable nav buttons based on access, and redirect if the current section is no longer accessible.
 export function updateSectionAccess() {
   document.querySelectorAll('#nav button').forEach(b => b.disabled = !canAccessSection(b.dataset.sec));
   if (!canAccessSection(state.current)) {
