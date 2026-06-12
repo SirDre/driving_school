@@ -10,9 +10,11 @@ export const $ = id => document.getElementById(id);
 // Transient bottom toast. Pass err=true for the error styling.
 export function toast(msg, err) {
   const t = $('toast');
+  
   $('toastMsg').textContent = msg;
   t.classList.toggle('err', !!err);
   t.classList.add('on');
+  
   setTimeout(() => t.classList.remove('on'), 2600);
 }
 

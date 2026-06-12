@@ -63,6 +63,7 @@ function renderConnectionGate() {
 
 function renderAuthGate() {
   setHeader('Authentication', 'Sign in required', 'Connect to Supabase, then register or sign in with the built-in basic auth roles.');
+  
   $('view').innerHTML = authGateView();
   $('gateSignIn').onclick = () => openSignInModal();
   $('gateRegister').onclick = () => openRegisterModal();
@@ -70,6 +71,7 @@ function renderAuthGate() {
 
 function renderAccessDenied(section) {
   setHeader('Access', SECTIONS[section]?.title || 'Section', 'Your role does not permit this section.');
+  
   $('view').innerHTML = accessDeniedView();
 }
 
@@ -79,7 +81,21 @@ export function setConn() {
   $('connText').textContent = state.mode === 'connected' ? 'Connected' : 'Disconnected';
   $('connBtn').textContent = state.mode === 'connected' ? 'Disconnect' : 'Connect to Supabase';
 }
-  
+
+export function updateAuthUI() {
+  const session = getSession();
+  const signedIn = !!session;
+
+  $('authDot').className = 'dot ' + (signedIn ? 'live' : 'red');
+
+  $('authText').textContent = signedIn ? '{session.email}' : 'Signed out';
+
+  $('signinBtn').style.display = signedIn ? 'none' : 'block';
+  $('registerBtn').style.display = signedIn ? 'none' : 'block';
+  $('rolesBtn').style.display = signedIn && canManageRoles() ? 'block' : 'none';
+  $('logoutBtn').style.display = signedIn ? 'block' : 'none';
+}
+
 export function updateSectionAccess() {
   document.querySelectorAll('#nav button').forEach(b => b.disabled = !canAccessSection(b.dataset.sec));
   if (!canAccessSection(state.current)) {
@@ -89,6 +105,7 @@ export function updateSectionAccess() {
 
 // Refresh every chrome element at once (after connect / auth changes).
 export function updateChrome() {
-  setConn(); 
+  setConn();
+  updateAuthUI();
   updateSectionAccess();
 }
