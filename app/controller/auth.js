@@ -25,7 +25,7 @@ export function disconnect() {
   state.mode = 'disconnected'; 
   state.db = makeDisconnectedDB(); 
   state.sbClient = null;  
-  state.supabaseConfig = { url: 'https://wwuzinagixfhuitbuoqw.supabase.co', key: '' }; // Reset saved Supabase config. 
+  state.supabaseConfig = { url: '', key: '' }; // Reset saved Supabase config. 
   state.REF = null; 
 
   clearSession(); 

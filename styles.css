@@ -628,7 +628,7 @@ th.num {
 .field input,
 .field select,
 .field textarea {
-    width: 100%;
+    width: 90%;
     font: inherit;
     font-size: 13.5px;
     padding: 9px 11px;
