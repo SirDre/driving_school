@@ -63,7 +63,7 @@ function renderConnectionGate() {
 
 function renderAuthGate() {
   setHeader('Authentication', 'Sign in required', 'Connect to Supabase, then register or sign in with the built-in basic auth roles.');
-  
+
   $('view').innerHTML = authGateView();
   $('gateSignIn').onclick = () => openSignInModal();
   $('gateRegister').onclick = () => openRegisterModal();
@@ -71,7 +71,7 @@ function renderAuthGate() {
 
 function renderAccessDenied(section) {
   setHeader('Access', SECTIONS[section]?.title || 'Section', 'Your role does not permit this section.');
-  
+
   $('view').innerHTML = accessDeniedView();
 }
 
@@ -85,11 +85,10 @@ export function setConn() {
 export function updateAuthUI() {
   const session = getSession();
   const signedIn = !!session;
-
   $('authDot').className = 'dot ' + (signedIn ? 'live' : 'red');
-
-  $('authText').textContent = signedIn ? '{session.email}' : 'Signed out';
-
+  $('authText').textContent = signedIn
+    ? 'Signed in as ' + (session.user.email || session.user.id) 
+    : 'Signed out';
   $('signinBtn').style.display = signedIn ? 'none' : 'block';
   $('registerBtn').style.display = signedIn ? 'none' : 'block';
   $('rolesBtn').style.display = signedIn && canManageRoles() ? 'block' : 'none';
