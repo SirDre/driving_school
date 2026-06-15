@@ -49,7 +49,12 @@ async function openStaffForm(row) {
     let cur = null;
 
     // Fetch all addresses for the address picker (optional, but nice to have).
-    allAddr = await state.db.listAddresses();
+    try {
+        allAddr = await state.db.listAddresses();
+    } catch (e) {
+        toast('Could not load the addresses: ' + e.message, true);
+        return;
+    }
 
     // If editing and the instructor has an address, fetch it to pre-fill the form.
     if (isEdit && row?.staff_address_id) {
@@ -75,7 +80,10 @@ async function openStaffForm(row) {
         };
 
         // Basic validation: first name, last name and joined date are required.
-        if (!payload.first || !payload.last || !payload.joined) { toast('First name, last name and joined date are required.', true); return; }
+        if (!payload.first || !payload.last || !payload.joined) {
+            toast('First name, last name and joined date are required.', true);
+            return;
+        }
 
 
         // If any address fields are filled, validate that the required address fields are present, then resolve or create the address and set staffAddressId.
@@ -87,14 +95,16 @@ async function openStaffForm(row) {
             if (addressHasInput(addr)) {
 
                 if (!addr.line_1_number_building || !addr.city || !addr.zip_postcode) {
-                    toast('For an address, building (line 1), city and postcode are required.', true); return;
+                    toast('For an address, building (line 1), city and postcode are required.', true);
+                    return;
                 }
 
                 // Try to resolve the address to an ID. 
                 try {
                     payload.staffAddressId = await state.db.resolveAddress(addr);
                 } catch (e) {
-                    toast('Could not save the address: ' + e.message, true); return;
+                    toast('Could not save the address: ' + e.message, true);
+                    return;
                 }
             }
 
@@ -128,14 +138,14 @@ function confirmDeleteStaff(row) {
 
     // Delete calls the model to delete the instructor, then shows a toast and refreshes the view.
     $('del').onclick = async () => {
-        try { 
+        try {
             await state.db.deleteStaff(row.staff_id);
             toast('Instructor deleted.');
             closeModal();
             state.REF = null;
-            refresh(); 
-        }catch (e) { 
-            toast(e.message, true); 
+            refresh();
+        } catch (e) {
+            toast(e.message, true);
         }
     };
 }

@@ -71,7 +71,7 @@ export function canAccessSection(section) {
     return canViewReports();
   
   if (section === 'schedule') 
-    return canManageOperations();
+    return hasRole('STAFF');
   
   return canManageOperations();   // customers, lessons
 }
