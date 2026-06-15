@@ -19,12 +19,12 @@ function load() {
 }
 
 // called by the auth controller after sign-in/sign-out, and by the router on app load to initialize the session from localStorage.
-function getSession() { 
+export function getSession() { 
   return appSession;
 }
 
 // sets the current session and persists it to localStorage. Pass null to clear.
-function setSession(session) {
+export function setSession(session) {
   appSession = session;
 
   // check the session in localStorage against the current session.
@@ -37,7 +37,7 @@ function setSession(session) {
 }
 
 // clears the session both in memory and in localStorage.
-function clearSession() { 
+export function clearSession() { 
   
   return setSession(null);
 }
@@ -45,21 +45,21 @@ function clearSession() {
 // --- Role-based access control -------------------------------------
 
 // helper to check if the current session has any of the specified roles.
-function hasRole(...roles) { 
+export function hasRole(...roles) { 
   return !!appSession?.roles?.some(role => roles.includes(role));
 }
-function canManageOperations() { 
+export function canManageOperations() { 
   return hasRole('ADMIN', 'STAFF'); 
 }
-function canViewReports() { 
+export function canViewReports() { 
   return hasRole('ADMIN', 'REPORT'); 
 }
-function canManageRoles() { 
+export function canManageRoles() { 
   return hasRole('ADMIN'); 
 }
 
 // business rules for section access.
-function canAccessSection(section) {
+export function canAccessSection(section) {
   
   if (!appSession) 
     return false;
