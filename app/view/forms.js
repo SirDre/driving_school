@@ -158,13 +158,20 @@ export function registerHTML() {
   return `<div class="mhead"><h3>Register</h3><p>Create an account and choose a starting role.</p></div>
     <div class="mbody">
       <div class="ftwo">
-        <div class="field"><label>Full name</label><input id="reg_name" placeholder="Jane Doe"></div>
-        <div class="field"><label>E-mail</label><input id="reg_email" type="email" placeholder="name@example.ca"></div>
+        <div class="field"><label>Full name</label><input id="reg_name" placeholder="Mary Jane"></div>
+        <div class="field"><label>E-mail</label><input id="reg_email" type="email" placeholder="mary.jane@dsbps.ca"></div>
       </div>
       <div class="ftwo">
         <div class="field"><label>Password</label><input id="reg_password" type="password" placeholder="At least 8 characters"></div>
-        <div class="field"><label>Role</label><select id="reg_role"><option value="STAFF">STAFF</option><option value="REPORT">REPORT</option><option value="ADMIN">ADMIN</option></select></div>
       </div>
+      <div class="ftwo">
+        <div class="field"><label>Role</label>
+          <select id="reg_role">
+            <option value="STAFF">STAFF</option>
+            <option value="REPORT">REPORT</option>
+          </select>
+        </div>
+      </div>  
       <div class="hint" style="font-size:12px">Roles control which sections and admin tools the account can access.</div>
     </div>
     <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn go" id="go">Register</button></div>`;
