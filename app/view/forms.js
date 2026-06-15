@@ -26,7 +26,7 @@ export function customerFormHTML(c, addrA, isEdit) {
       </div>
       <div class="field"><label>Status</label><select id="f_status">${statusOptions(c?.status_code || 'ACT')}</select></div>
       <div class="field"><label>Email</label><input id="f_email" type="email" value="${esc(c?.email || '')}" placeholder="name@example.ca"></div>
-      <div class="field"><label>Mobile</label><input id="f_cell" value="${esc(c?.cell || '')}" placeholder="(587) 555-0000"></div>
+      <div class="field"><label>Mobile</label><input id="f_cell" type="tel" inputmode="tel" value="${esc(c?.cell || '')}" placeholder="(587) 555-0000"></div>
       ${addressSectionHTML('c', addrA, isEdit)}
     </div>
     <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">${isEdit ? 'Save customer' : 'Add customer'}</button></div>`;

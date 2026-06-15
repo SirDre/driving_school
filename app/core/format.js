@@ -16,6 +16,15 @@ export const esc = s => String(s ?? '').replace(/[&<>"]/g,
 // Basic e-mail syntax check for form validation.
 export const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email ?? '').trim());
 
+// Basic phone syntax check for form validation.
+export const isValidPhone = phone => {
+  const value = String(phone ?? '').trim();
+  if (!value) return true;
+  if (!/^[\d\s()+.\-]+$/.test(value)) return false;
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= 10 && digits.length <= 15;
+};
+
 // Whole-year age from an ISO date of birth.
 export const ageFrom = dob => {
   if (!dob) return '';

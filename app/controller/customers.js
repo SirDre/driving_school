@@ -6,7 +6,7 @@
 
 import { state } from '../core/state.js';
 import { $, toast, openModal, closeModal } from '../core/dom.js';
-import { isValidEmail } from '../core/format.js';
+import { isValidEmail, isValidPhone } from '../core/format.js';
 import { customersView } from '../view/sections.js';
 import { customerFormHTML, paymentFormHTML, deleteCustomerHTML } from '../view/forms.js';
 import { wireAddressPicker, readAddressFields, addressHasInput } from '../view/components.js';
@@ -64,8 +64,15 @@ async function openCustomerForm(c) {
             return;
         }
 
+        // Basic email validation: either blank or must be a valid email format.
         if (r.email && !isValidEmail(r.email)) {
             toast('Enter a valid e-mail address, or leave it blank.', true);
+            return;
+        }
+
+        // Basic phone validation: either blank or must be a valid phone number format.
+        if (r.cell && !isValidPhone(r.cell)) {
+            toast('Enter a valid mobile number, or leave it blank.', true);
             return;
         }
 

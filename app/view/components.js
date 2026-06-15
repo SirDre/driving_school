@@ -14,7 +14,7 @@ import { state } from '../core/state.js';
 export function balPill(b) {
   const n = Number(b);
   if (n <= 0) return `<span class="pill green">Paid up</span>`;
-  if (n < 40)  return `<span class="pill amber">${fmt$(n)}</span>`;
+  if (n < 40) return `<span class="pill amber">${fmt$(n)}</span>`;
   return `<span class="pill red">${fmt$(n)}</span>`;
 }
 
@@ -24,8 +24,10 @@ export function custStatusPill(code) {
 }
 
 export function lessonPill(s) {
-  const map = { Completed: 'green', Confirmed: 'blue', Booked: 'amber',
-    'Cancelled by customer': 'grey', 'No show': 'red', Rescheduled: 'grey' };
+  const map = {
+    Completed: 'green', Confirmed: 'blue', Booked: 'amber',
+    'Cancelled by customer': 'grey', 'No show': 'red', Rescheduled: 'grey'
+  };
   return `<span class="pill ${map[s] || 'grey'}">${esc(s)}</span>`;
 }
 
@@ -76,26 +78,75 @@ export function wireAddressPicker(p, addresses) {
     $(`${p}_line1`).value = a.line_1_number_building || '';
     $(`${p}_line2`).value = a.line_2_number_street || '';
     $(`${p}_line3`).value = a.line_3_area_locality || '';
-    $(`${p}_city`).value  = a.city || '';
-    $(`${p}_post`).value  = a.zip_postcode || '';
-    $(`${p}_prov`).value  = a.state_province_county || '';
+    $(`${p}_city`).value = a.city || '';
+    $(`${p}_post`).value = a.zip_postcode || '';
+    $(`${p}_prov`).value = a.state_province_county || '';
     $(`${p}_country`).value = a.country || 'Canada';
   };
   const clear = () => { ['line1', 'line2', 'line3', 'city', 'post', 'prov'].forEach(s => $(`${p}_${s}`).value = ''); $(`${p}_country`).value = 'Canada'; };
 
-  const searchEl = $(`${p}_addr_search`), resEl = $(`${p}_addr_results`);
+  // Search input and dropdown container for address matches.
+  const searchEl = $(`${p}_addr_search`);
+  const resEl = $(`${p}_addr_results`);
+
+  // Live-search existing addresses as the user types.
   searchEl.oninput = () => {
     const q = searchEl.value.trim().toLowerCase();
-    if (!q) { resEl.classList.remove('on'); resEl.innerHTML = ''; return; }
-    const hits = addresses.filter(a => [a.line_1_number_building, a.line_2_number_street, a.line_3_area_locality, a.city, a.zip_postcode, a.state_province_county]
-      .some(x => (x || '').toLowerCase().includes(q))).slice(0, 8);
-    if (!hits.length) { resEl.innerHTML = '<div class="addr-none">No match — type the new address in the fields below.</div>'; resEl.classList.add('on'); return; }
-    resEl.innerHTML = hits.map((a, i) => `<div class="addr-result" data-i="${i}"><b>${esc(addrLabel(a))}</b>`
-      + `<small>${esc([a.state_province_county, a.country].filter(Boolean).join(' · '))} · #${a.address_id}</small></div>`).join('');
+
+    // Empty query: hide results and reset list content.
+    if (!q) {
+      resEl.classList.remove('on');
+      resEl.innerHTML = '';
+      return;
+    }
+
+    // Match against common address fields and keep the list compact.
+    const hits = addresses
+      .filter(a => [
+        a.line_1_number_building,
+        a.line_2_number_street,
+        a.line_3_area_locality,
+        a.city,
+        a.zip_postcode,
+        a.state_province_county,
+      ].some(x => (x || '').toLowerCase().includes(q)))
+      .slice(0, 8);
+
+    // No results: keep panel open with helper text.
+    if (!hits.length) {
+      resEl.innerHTML = '<div class="addr-none">No match — type the new address in the fields below.</div>';
+      resEl.classList.add('on');
+      return;
+    }
+
+    // Render clickable results.
+    resEl.innerHTML = hits
+      .map((a, i) =>
+        `<div class="addr-result" data-i="${i}"><b>${esc(addrLabel(a))}</b>`
+        + `<small>${esc([a.state_province_county, a.country].filter(Boolean).join(' · '))} · #${a.address_id}</small></div>`
+      )
+      .join('');
+
     resEl.classList.add('on');
-    resEl.querySelectorAll('.addr-result').forEach(elm => elm.onclick = () => { fill(hits[+elm.dataset.i]); resEl.classList.remove('on'); searchEl.value = ''; });
+
+    // Selecting a result fills fields and closes the list.
+    resEl
+      .querySelectorAll('.addr-result')
+      .forEach(elm => {
+        elm.onclick = () => {
+          fill(hits[+elm.dataset.i]);
+          resEl.classList.remove('on');
+          searchEl.value = '';
+        };
+      });
   };
-  $(`${p}_addr_clear`).onclick = () => { clear(); searchEl.value = ''; resEl.classList.remove('on'); };
+
+  // Clear button: reset fields, search box, and result panel.
+  $(`${p}_addr_clear`).onclick = () => {
+    clear();
+    searchEl.value = '';
+    resEl.classList.remove('on');
+  };
 }
 
 // Read the seven address fields back into an object.
