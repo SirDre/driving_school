@@ -185,11 +185,11 @@ export function makeLiveDB(sb) {
 
     // --- Lessons & payments (write through stored-procedure wrappers) ---
     async bookLesson(p) {
-      const { error } = await sb.schema('driving_school').rpc('fn_book_lesson', {
+      const { data, error } = await sb.schema('driving_school').rpc('fn_book_lesson', {
         p_customer_id: +p.cust, p_staff_id: p.staff ? +p.staff : null, p_vehicle_id: p.veh ? +p.veh : null,
         p_date: p.date, p_time: p.time, p_price: +p.price,
       });
-      ok(null, error); return true;
+      return ok(data, error);
     },
     async getLesson(id) {
       const { data, error } = await s.from('lessons').select('*').eq('lesson_id', +id).single();

@@ -49,6 +49,7 @@ async function openLessonForm(lesson) {
     const p = {
       cust: $('b_cust').value, staff: $('b_staff').value, veh: $('b_veh').value,
       date: $('b_date').value, time: $('b_time').value, price: $('b_price').value, notes: $('b_notes').value.trim(),
+      status_code: $('b_status').value,
     };
 
     // Basic validation 
@@ -61,11 +62,13 @@ async function openLessonForm(lesson) {
     try {
       // save the lesson through the model 
       if (isEdit) {
-        p.status_code = current?.status_code;
         await state.db.updateLesson(current.lesson_id, p);
         toast('Lesson updated.');
       } else {
-        await state.db.bookLesson(p);
+        const newId = await state.db.bookLesson(p);
+        if (p.status_code && p.status_code !== 'BOOK') {
+          await state.db.updateLesson(newId, p);
+        }
         toast('Lesson booked.');
       }
     } catch (e) {

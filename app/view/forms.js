@@ -49,6 +49,9 @@ export function paymentFormHTML(c) {
 /* ---------------- Lesson booking form ---------------- */
 export function lessonFormHTML(l, isEdit = false) {
   const selected = (a, b) => String(a ?? '') === String(b ?? '') ? ' selected' : '';
+  const statusOpts = Object.entries(state.REF.lessStatus || {})
+    .map(([code, label]) => `<option value="${code}"${selected(code, l?.status_code || 'BOOK')}>${esc(label)}</option>`)
+    .join('');
   const custOpts = state.REF.customers
     .map(c => `<option value="${c.id}"${selected(c.id, l?.cust)}>${esc(c.name)}${c.status === 'SUS' ? ' (suspended)' : ''}</option>`)
     .join('');
@@ -73,8 +76,9 @@ export function lessonFormHTML(l, isEdit = false) {
       </div>
       <div class="ftwo">
         <div class="field"><label>Price (CAD)</label><input id="b_price" type="number" step="0.01" min="0" value="${esc(l?.price ?? '70.00')}"></div>
-        <div class="field"><label>Notes</label><input id="b_notes" value="${esc(l?.notes || '')}" placeholder="e.g. Highway intro"></div>
+        <div class="field"><label>Status</label><select id="b_status">${statusOpts}</select></div>
       </div>
+      <div class="field"><label>Notes</label><input id="b_notes" value="${esc(l?.notes || '')}" placeholder="e.g. Highway intro"></div>
     </div>
     <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">${isEdit ? 'Save lesson' : 'Book lesson'}</button></div>`;
 }
