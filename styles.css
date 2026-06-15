@@ -423,6 +423,12 @@ th.num {
     border: 1px solid var(--line)
 }
 
+.iconbtn i {
+    font-size: 13px;
+    line-height: 1;
+    pointer-events: none;
+}
+
 .iconbtn:hover {
     background: #fff;
     color: var(--ink);

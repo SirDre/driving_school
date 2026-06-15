@@ -44,9 +44,9 @@ export function customersView(rows) {
       <td class="muted" style="font-size:12.5px">${esc(c.full_address)}</td>
       <td class="num">${balPill(c.balance)}</td>
       <td><div class="row-actions">
-        <button class="iconbtn" title="Record payment" data-pay="${c.customer_id}">＄</button>
-        <button class="iconbtn" title="Edit" data-edit="${c.customer_id}">✎</button>
-        <button class="iconbtn del" title="Delete" data-del="${c.customer_id}">🗑</button>
+        <button class="iconbtn" title="Record payment" data-pay="${c.customer_id}"><i class="fa-solid fa-dollar-sign" aria-hidden="true"></i></button>
+        <button class="iconbtn" title="Edit" data-edit="${c.customer_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+        <button class="iconbtn del" title="Delete" data-del="${c.customer_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
       </div></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -64,8 +64,8 @@ export function lessonsView(rows) {
       <td class="num">${fmt$(l.price)}</td>
       <td>${lessonPill(l.status)}</td>
       <td><div class="row-actions">
-        ${['Booked', 'Confirmed'].includes(l.status) ? `<button class="iconbtn" title="Cancel lesson" data-cancel="${l.lesson_id}">⊘</button>` : ''}
-        <button class="iconbtn del" title="Delete" data-del="${l.lesson_id}">🗑</button>
+        ${['Booked', 'Confirmed'].includes(l.status) ? `<button class="iconbtn" title="Cancel lesson" data-cancel="${l.lesson_id}"><i class="fa-solid fa-ban" aria-hidden="true"></i></button>` : ''}
+        <button class="iconbtn del" title="Delete" data-del="${l.lesson_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
       </div></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
@@ -87,8 +87,8 @@ export function scheduleView({ today, upcoming, instr, work, staffRows, canManag
           <td class="num muted mono">${esc((s.date_left_staff || '').slice(0, 10) || '—')}</td>
           <td class="muted" style="font-size:12.5px">${esc(s.other_staff_details || '')}</td>
           <td><div class="row-actions">
-            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}">✎</button>
-            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}">🗑</button>
+            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
           </div></td></tr>`).join('')}</tbody></table></div></div>` : '';
 
   return `<div class="grid g2" style="align-items:start">
