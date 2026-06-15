@@ -176,10 +176,10 @@ export function rolesTableHTML(users, userRoles) {
       <td>
         <div class="field" style="margin:0 0 6px 0"><select data-role-for="${u.user_id}"><option value="STAFF">STAFF</option><option value="REPORT">REPORT</option><option value="ADMIN">ADMIN</option></select></div>
         <div class="row-actions" style="justify-content:flex-start; flex-wrap:wrap">
-          <button class="iconbtn" data-assign="${u.user_id}" title="Assign role">+</button>
-          <button class="iconbtn" data-revoke="${u.user_id}" title="Revoke role">−</button>
-          <button class="iconbtn" data-pass="${u.user_id}" title="Set password">✎</button>
-          <button class="iconbtn danger" data-del-user="${u.user_id}" title="Delete user">🗑</button>
+          <button class="iconbtn" data-assign="${u.user_id}" title="Assign role"><i class="fa-solid fa-plus" aria-hidden="true"></i ></button>
+          <button class="iconbtn" data-revoke="${u.user_id}" title="Revoke role"><i class="fa-solid fa-times" aria-hidden="true"></i></button>
+          <button class="iconbtn" data-pass="${u.user_id}" title="Set password"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+          <button class="iconbtn danger" data-del-user="${u.user_id}" title="Delete user"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
         </div>
       </td>
     </tr>`;

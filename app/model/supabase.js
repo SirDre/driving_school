@@ -10,7 +10,7 @@ export async function connectSupabase(url, key) {
   const sb = mod.createClient(url, key, { db: { schema: 'driving_school' } });
 
   // Probe the schema so we fail fast with a clear message if it isn't exposed.
-  const test = await sb.schema('driving_school').from('vw_customer_full_address').select('customer_id').limit(1);
+  const test = await sb.schema('driving_school').from('customers').select('customer_id').limit(1);
   
   if (test.error) {
     const msg = test.error.message || 'could not query the Supabase schema';
