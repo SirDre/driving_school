@@ -31,14 +31,14 @@ export async function mountSchedule() {
         $('headAction').innerHTML = '';
     }
 
-    // If the user can manage, set up click handlers for edit and delete buttons in the staff table. Otherwise, these buttons won't be rendered at all.
+    // Render the schedule view with all the fetched data and the canManage flag to conditionally show management features.
+    v.innerHTML = scheduleView({ today, upcoming, instr, work, staffRows, canManage });
+
+    // Wire the action buttons after the table markup has been rendered.
     if (canManage) {
         v.querySelectorAll('[data-staff-edit]').forEach(b => b.onclick = () => openStaffForm(staffRows.find(r => r.staff_id == b.dataset.staffEdit)));
         v.querySelectorAll('[data-staff-del]').forEach(b => b.onclick = () => confirmDeleteStaff(staffRows.find(r => r.staff_id == b.dataset.staffDel)));
     }
-
-    // Render the schedule view with all the fetched data and the canManage flag to conditionally show management features.
-    v.innerHTML = scheduleView({ today, upcoming, instr, work, staffRows, canManage });
 
 
 }
