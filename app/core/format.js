@@ -13,6 +13,9 @@ export const fmt$ = n => 'CA$' + Number(n || 0).toFixed(2);
 export const esc = s => String(s ?? '').replace(/[&<>"]/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// Basic e-mail syntax check for form validation.
+export const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email ?? '').trim());
+
 // Whole-year age from an ISO date of birth.
 export const ageFrom = dob => {
   if (!dob) return '';

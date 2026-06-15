@@ -11,6 +11,7 @@ import { esc } from '../core/format.js';
 import { connectSupabase } from '../model/supabase.js';
 import { makeSupabaseDB, makeDisconnectedDB } from '../model/dataService.js';
 import { setSession, clearSession, canManageRoles } from '../model/session.js';
+import { isValidEmail } from '../core/format.js';
 import { connectHTML, signInHTML, registerHTML, rolesShellHTML, rolesTableHTML } from '../view/forms.js';
 import { refresh, updateChrome } from './router.js';
 
@@ -103,6 +104,10 @@ export function openSignInModal() {
       // Stop here.
       return;
     }
+    if (!isValidEmail(email)) {
+      toast('Enter a valid e-mail address.', true);
+      return;
+    }
     // Update the button state.
     $('go').textContent = 'Signing in…';
     // Disable repeated clicks.
@@ -159,6 +164,11 @@ export function openRegisterModal() {
         // Stop here.
         return; 
       }
+
+    if (!isValidEmail(email)) {
+      toast('Enter a valid e-mail address.', true);
+      return;
+    }
     
     // Update the button state.
     $('go').textContent = 'Registering…'; 

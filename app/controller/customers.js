@@ -6,6 +6,7 @@
 
 import { state } from '../core/state.js';
 import { $, toast, openModal, closeModal } from '../core/dom.js';
+import { isValidEmail } from '../core/format.js';
 import { customersView } from '../view/sections.js';
 import { customerFormHTML, paymentFormHTML, deleteCustomerHTML } from '../view/forms.js';
 import { wireAddressPicker, readAddressFields, addressHasInput } from '../view/components.js';
@@ -60,6 +61,11 @@ async function openCustomerForm(c) {
         // Basic validation: ensure required fields are filled. More complex validation (e.g. email format) could be added here or in the model.
         if (!r.first || !r.last || !r.dob || !r.since) {
             toast('Name, date of birth and start date are required.', true);
+            return;
+        }
+
+        if (r.email && !isValidEmail(r.email)) {
+            toast('Enter a valid e-mail address, or leave it blank.', true);
             return;
         }
 
