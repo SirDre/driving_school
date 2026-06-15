@@ -19,6 +19,7 @@ import { openSignInModal, openRegisterModal } from './auth.js';
 // Map each section id to the controller that renders it.
 const mounts = { customers: mountCustomers, lessons: mountLessons, schedule: mountSchedule, reports: mountReports };
 
+// Set the header content in the app chrome.
 function setHeader(eyebrow, title, sub) {
   $('eyebrow').textContent = eyebrow;
   $('title').textContent = title;
@@ -99,7 +100,7 @@ export function updateAuthUI() {
 
   $('authDot').className = 'dot ' + (signedIn ? 'live' : 'red');
   $('authText').textContent = signedIn
-    ? '${session.fullName || session.email} · ${(session.roles || []).join(", ") || "no role"}'
+    ? `${session.email}`
     : 'Signed out';
   $('signinBtn').style.display = signedIn ? 'none' : 'block';
   $('registerBtn').style.display = signedIn ? 'none' : 'block';

@@ -8,30 +8,59 @@ const STORAGE_KEY = 'dsbps.appSession';
 
 let appSession = load();
 
+// called by the auth controller after sign-in/sign-out, and by the router on app load to initialize the session from localStorage.
 function load() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
-  catch { return null; }
+  try { 
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); 
+  
+  }catch {
+    return null;
+  }
 }
 
-export function getSession() { return appSession; }
-
-export function setSession(session) {
-  appSession = session;
-  if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-  else localStorage.removeItem(STORAGE_KEY);
+// called by the auth controller after sign-in/sign-out, and by the router on app load to initialize the session from localStorage.
+function getSession() { 
   return appSession;
 }
 
-export function clearSession() { return setSession(null); }
+// sets the current session and persists it to localStorage. Pass null to clear.
+function setSession(session) {
+  appSession = session;
+
+  // check the session in localStorage against the current session.
+  if (session)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  else
+    localStorage.removeItem(STORAGE_KEY);
+  
+  return appSession;
+}
+
+// clears the session both in memory and in localStorage.
+function clearSession() { 
+  
+  return setSession(null);
+}
 
 // --- Role-based access control -------------------------------------
-export function hasRole(...roles) { return !!appSession?.roles?.some(role => roles.includes(role)); }
-export function canManageOperations() { return hasRole('ADMIN', 'STAFF'); }
-export function canViewReports()      { return hasRole('ADMIN', 'REPORT'); }
-export function canManageRoles()      { return hasRole('ADMIN'); }
+
+// helper to check if the current session has any of the specified roles.
+function hasRole(...roles) { 
+  return !!appSession?.roles?.some(role => roles.includes(role));
+}
+function canManageOperations() { 
+  return hasRole('ADMIN', 'STAFF'); 
+}
+function canViewReports() { 
+  return hasRole('ADMIN', 'REPORT'); 
+}
+function canManageRoles() { 
+  return hasRole('ADMIN'); 
+}
 
 // business rules for section access.
-export function canAccessSection(section) {
+function canAccessSection(section) {
+  
   if (!appSession) 
     return false;
   
@@ -42,7 +71,7 @@ export function canAccessSection(section) {
     return canViewReports();
   
   if (section === 'schedule') 
-    return hasRole('STAFF');
+    return canManageOperations();
   
   return canManageOperations();   // customers, lessons
 }

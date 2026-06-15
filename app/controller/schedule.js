@@ -12,7 +12,7 @@ import { wireAddressPicker, readAddressFields, addressHasInput } from '../view/c
 import { canManageOperations } from '../model/session.js';
 import { refresh } from './router.js';
 
-export async function mountSchedule() {
+async function mountSchedule() {
 
     // Fetch all necessary data for the schedule and staff views.   
     const today = await state.db.listToday();

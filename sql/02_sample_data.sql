@@ -20,11 +20,6 @@ INSERT INTO Ref_Payment_Methods (payment_method_code, payment_method_description
 ('CASH','Cash'),('CARD','Debit / Credit card'),('BANK','Bank transfer / Interac e-Transfer'),
 ('DD','Pre-authorized debit'),('VOUCH','Gift voucher');
 
-INSERT INTO app_roles (role_code, role_name, description) VALUES
-('ADMIN',  'Administrator',    'Full administrative access (maps to ds_dba).'),
-('STAFF',  'Front-desk staff', 'Operational booking/payment access (maps to ds_app).'),
-('REPORT', 'Reporting analyst','Read-only access to reports (maps to ds_report).');
-
 INSERT INTO Addresses
 (line_1_number_building, line_2_number_street, line_3_area_locality, city, zip_postcode, state_province_county, country) VALUES
 ('1234','17 Avenue SW','Beltline','Calgary','T2T 0C5','Alberta','Canada'),
@@ -97,3 +92,10 @@ INSERT INTO Customer_Payments
 (6,'2024-06-11 13:45:00','DD',40.00,'Pre-authorized debit - part payment'),
 (7,'2024-05-20 10:00:00','CARD',65.00,'Paid in full'),
 (8,'2024-06-02 15:45:00','VOUCH',10.00,'Gift voucher - part payment');
+
+
+-- Additional app tables used by the application (authentication/authorization)
+INSERT INTO app_roles (role_code, role_name, description) VALUES
+('ADMIN',  'Administrator',    'Full administrative access (maps to ds_dba).'),
+('STAFF',  'Front-desk staff', 'Operational booking/payment access (maps to ds_app).'),
+('REPORT', 'Reporting analyst','Read-only access to reports (maps to ds_report).');
