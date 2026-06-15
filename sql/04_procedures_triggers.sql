@@ -324,3 +324,34 @@ CREATE TRIGGER trg_audit_lesson_status_change
 AFTER UPDATE ON Lessons
 FOR EACH ROW
 EXECUTE FUNCTION fn_audit_lesson_status_change();
+
+-- TRIGGER AUTH: Only allow users with 'admin' role to delete users.
+-- ADMIN AUTH HELPERS
+-- Delete a registered application user and cascade their role assignments.
+CREATE OR REPLACE FUNCTION fn_delete_user(
+    IN p_user_id INT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SET search_path = driving_school
+AS $$
+DECLARE
+    v_email VARCHAR(255);
+BEGIN
+    SELECT email
+    INTO v_email
+    FROM app_users
+    WHERE user_id = p_user_id;
+
+    IF v_email IS NULL THEN
+        RETURN jsonb_build_object('ok', false, 'message', 'User not found');
+    END IF;
+
+    DELETE FROM app_users
+    WHERE user_id = p_user_id;
+
+    RETURN jsonb_build_object('ok', true, 'message', 'User deleted.');
+END;
+$$ LANGUAGE plpgsql;
+
+

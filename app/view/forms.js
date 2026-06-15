@@ -179,6 +179,7 @@ export function rolesTableHTML(users, userRoles) {
           <button class="iconbtn" data-assign="${u.user_id}" title="Assign role">+</button>
           <button class="iconbtn" data-revoke="${u.user_id}" title="Revoke role">−</button>
           <button class="iconbtn" data-pass="${u.user_id}" title="Set password">✎</button>
+          <button class="iconbtn danger" data-del-user="${u.user_id}" title="Delete user">🗑</button>
         </div>
       </td>
     </tr>`;

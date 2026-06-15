@@ -10,7 +10,7 @@ import { $, toast, openModal, closeModal } from '../core/dom.js';
 import { esc } from '../core/format.js';
 import { connectSupabase } from '../model/supabase.js';
 import { makeSupabaseDB, makeDisconnectedDB } from '../model/dataService.js';
-import { setSession, clearSession, canManageRoles } from '../model/session.js';
+import { setSession, clearSession, canManageRoles, getSession } from '../model/session.js';
 import { isValidEmail } from '../core/format.js';
 import { connectHTML, signInHTML, registerHTML, rolesShellHTML, rolesTableHTML } from '../view/forms.js';
 import { refresh, updateChrome } from './router.js';
@@ -253,6 +253,8 @@ async function loadRolesPanel() {
     box.querySelectorAll('[data-revoke]').forEach(btn => btn.onclick = () => roleAction('revoke', +btn.dataset.revoke));
     // Wire password buttons.
     box.querySelectorAll('[data-pass]').forEach(btn => btn.onclick = () => setPasswordPrompt(+btn.dataset.pass));
+    // Wire delete-user buttons.
+    box.querySelectorAll('[data-del-user]').forEach(btn => btn.onclick = () => deleteUserPrompt(+btn.dataset.delUser));
   
   } catch (e) {
     // Show load errors safely.
@@ -310,5 +312,28 @@ async function setPasswordPrompt(userId) {
   } catch (e) { 
     // Show the error message.
     toast(e.message, true); 
+  }
+}
+
+async function deleteUserPrompt(userId) {
+  // Prevent deleting the currently signed-in user from the admin panel.
+  if (getSession()?.userId === userId) {
+    toast('You cannot delete your own account while signed in.', true);
+    return;
+  }
+
+  // Ask for confirmation with a destructive action prompt.
+  const confirmText = prompt('Type DELETE to confirm removal of this user:');
+  if (confirmText !== 'DELETE') return;
+
+  try {
+    const { data, error } = await state.sbClient.rpc('fn_delete_user', { p_user_id: userId });
+    if (error) throw new Error(error.message || 'User deletion failed');
+    if (!data?.ok) throw new Error(data?.message || 'User deletion failed');
+
+    await loadRolesPanel();
+    toast(data.message || 'User deleted.');
+  } catch (e) {
+    toast(e.message, true);
   }
 }
