@@ -48,14 +48,14 @@ async function openStaffForm(row) {
     let allAddr = [];
     let cur = null;
 
+    // Fetch all addresses for the address picker (optional, but nice to have).
+    allAddr = await state.db.listAddresses();
+
     // If editing and the instructor has an address, fetch it to pre-fill the form.
     if (isEdit && row?.staff_address_id) {
         cur = await state.db.getAddress(row.staff_address_id);
 
     }
-
-    // Fetch all addresses for the address picker (optional, but nice to have).
-    allAddr = await state.db.listAddresses();
 
     // Render the form modal with the staff data (if editing) and the list of all addresses for the picker.
     openModal(staffFormHTML(row, cur || {}, isEdit));
