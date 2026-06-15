@@ -46,7 +46,7 @@ export function setSection(sec) {
 // This is the main "refresh" function that all controllers call after they mutate data. 
 export async function refresh() {
   const v = $('view');
-  v.innerHTML = '<div class="card empty">Loading…</div>';
+        v.innerHTML = `<div class="card empty">Loading…</div>`;
 
   try {
     if (state.mode !== 'connected' || !state.sbClient) return renderConnectionGate();
@@ -56,7 +56,7 @@ export async function refresh() {
     const mount = mounts[state.current];
     if (mount) await mount();
   } catch (e) {
-    v.innerHTML = '<div class="card empty"><b>Couldn\'t load data</b>' + esc(e.message) + '</div>';
+    v.innerHTML = `<div class="card empty"><b>Couldn't load data</b>${esc(e.message)}</div>`;
   }
 }
 
