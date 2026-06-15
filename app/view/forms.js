@@ -47,11 +47,20 @@ export function paymentFormHTML(c) {
 }
 
 /* ---------------- Lesson booking form ---------------- */
-export function lessonFormHTML() {
-  const custOpts = state.REF.customers.map(c => `<option value="${c.id}">${esc(c.name)}${c.status === 'SUS' ? ' (suspended)' : ''}</option>`).join('');
-  const staffOpts = state.REF.staff.filter(s => !s.left && !/administrator/i.test(s.notes)).map(s => `<option value="${s.id}">${esc(s.first + ' ' + s.last)}</option>`).join('');
-  const vehOpts = state.REF.vehicles.map(v => `<option value="${v.id}">${esc(v.details.split(' - Plate')[0])}</option>`).join('');
-  return `<div class="mhead"><h3>Book a lesson</h3><p>Validated against suspensions and instructor/vehicle double-booking.</p></div>
+export function lessonFormHTML(l, isEdit = false) {
+  const selected = (a, b) => String(a ?? '') === String(b ?? '') ? ' selected' : '';
+  const custOpts = state.REF.customers
+    .map(c => `<option value="${c.id}"${selected(c.id, l?.cust)}>${esc(c.name)}${c.status === 'SUS' ? ' (suspended)' : ''}</option>`)
+    .join('');
+  const staffOpts = state.REF.staff
+    .filter(s => !s.left && !/administrator/i.test(s.notes))
+    .map(s => `<option value="${s.id}"${selected(s.id, l?.staff)}>${esc(s.first + ' ' + s.last)}</option>`)
+    .join('');
+  const vehOpts = state.REF.vehicles
+    .map(v => `<option value="${v.id}"${selected(v.id, l?.veh)}>${esc(v.details.split(' - Plate')[0])}</option>`)
+    .join('');
+
+  return `<div class="mhead"><h3>${isEdit ? 'Edit lesson' : 'Book a lesson'}</h3><p>Validated against suspensions and instructor/vehicle double-booking.</p></div>
     <div class="mbody">
       <div class="field"><label>Customer</label><select id="b_cust">${custOpts}</select></div>
       <div class="ftwo">
@@ -59,15 +68,15 @@ export function lessonFormHTML() {
         <div class="field"><label>Vehicle</label><select id="b_veh"><option value="">— none —</option>${vehOpts}</select></div>
       </div>
       <div class="ftwo">
-        <div class="field"><label>Date</label><input id="b_date" type="date" value="${todayISO()}"></div>
-        <div class="field"><label>Time</label><input id="b_time" type="time" value="09:00"></div>
+        <div class="field"><label>Date</label><input id="b_date" type="date" value="${esc(l?.date || todayISO())}"></div>
+        <div class="field"><label>Time</label><input id="b_time" type="time" value="${esc(l?.time || '09:00')}"></div>
       </div>
       <div class="ftwo">
-        <div class="field"><label>Price (CAD)</label><input id="b_price" type="number" step="0.01" min="0" value="70.00"></div>
-        <div class="field"><label>Notes</label><input id="b_notes" placeholder="e.g. Highway intro"></div>
+        <div class="field"><label>Price (CAD)</label><input id="b_price" type="number" step="0.01" min="0" value="${esc(l?.price ?? '70.00')}"></div>
+        <div class="field"><label>Notes</label><input id="b_notes" value="${esc(l?.notes || '')}" placeholder="e.g. Highway intro"></div>
       </div>
     </div>
-    <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">Book lesson</button></div>`;
+    <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">${isEdit ? 'Save lesson' : 'Book lesson'}</button></div>`;
 }
 
 /* ---------------- Instructor (staff) form ---------------- */

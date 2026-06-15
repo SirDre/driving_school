@@ -18,13 +18,26 @@ export async function mountLessons() {
   // set up click handlers for cancel and delete buttons in the lesson table. 
   const v = $('view');
   v.innerHTML = lessonsView(rows);
+  v.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openLessonForm(rows.find(r => r.lesson_id == b.dataset.edit)));
   v.querySelectorAll('[data-cancel]').forEach(b => b.onclick = () => confirmCancelLesson(+b.dataset.cancel));
   v.querySelectorAll('[data-del]').forEach(b => b.onclick = () => confirmDeleteLesson(rows.find(r => r.lesson_id == b.dataset.del)));
 }
 
 // Shows the form to book a new lesson. Validates input, calls the model to save, and refreshes the view on success.
-function openLessonForm() {
-  openModal(lessonFormHTML());
+async function openLessonForm(lesson) {
+  const isEdit = !!lesson;
+  let current = null;
+
+  if (isEdit) {
+    try {
+      current = await state.db.getLesson(lesson.lesson_id);
+    } catch (e) {
+      toast(e.message, true);
+      return;
+    }
+  }
+
+  openModal(lessonFormHTML(current, isEdit));
 
   // Set up the cancel button to close the modal.
   $('cancel').onclick = closeModal;
@@ -45,12 +58,20 @@ function openLessonForm() {
       return;
     }
 
-    // save the lesson through the model 
-    await state.db.bookLesson(p);
-
-    // show success message 
-    toast('Lesson booked.');
-
+    try {
+      // save the lesson through the model 
+      if (isEdit) {
+        p.status_code = current?.status_code;
+        await state.db.updateLesson(current.lesson_id, p);
+        toast('Lesson updated.');
+      } else {
+        await state.db.bookLesson(p);
+        toast('Lesson booked.');
+      }
+    } catch (e) {
+      toast(e.message, true);
+      return;
+    }
     closeModal();
     refresh();
   };

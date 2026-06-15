@@ -19,7 +19,8 @@ export function makeDisconnectedDB() {
     listAddresses: blocked, getAddress: blocked, resolveAddress: blocked,
     addCustomer: blocked, updateCustomer: blocked, deleteCustomer: blocked,
     listStaff: blocked, addStaff: blocked, updateStaff: blocked, deleteStaff: blocked,
-    bookLesson: blocked, recordPayment: blocked, cancelLesson: blocked, deleteLesson: blocked,
+    bookLesson: blocked, getLesson: blocked, updateLesson: blocked,
+    recordPayment: blocked, cancelLesson: blocked, deleteLesson: blocked,
   };
 }
 
@@ -188,6 +189,36 @@ export function makeLiveDB(sb) {
         p_customer_id: +p.cust, p_staff_id: p.staff ? +p.staff : null, p_vehicle_id: p.veh ? +p.veh : null,
         p_date: p.date, p_time: p.time, p_price: +p.price,
       });
+      ok(null, error); return true;
+    },
+    async getLesson(id) {
+      const { data, error } = await s.from('lessons').select('*').eq('lesson_id', +id).single();
+      const r = ok(data, error);
+      return {
+        lesson_id: r.lesson_id,
+        cust: r.customer_id,
+        staff: r.staff_id,
+        veh: r.vehicle_id,
+        date: r.lesson_date,
+        time: (r.lesson_time || '').slice(0, 5),
+        price: r.price,
+        notes: r.other_lesson_details || '',
+        status_code: r.lesson_status_code,
+      };
+    },
+    async updateLesson(id, p) {
+      const patch = {
+        customer_id: +p.cust,
+        staff_id: p.staff ? +p.staff : null,
+        vehicle_id: p.veh ? +p.veh : null,
+        lesson_date: p.date,
+        lesson_time: p.time,
+        price: +p.price,
+        other_lesson_details: p.notes || null,
+      };
+      if (p.status_code) patch.lesson_status_code = p.status_code;
+
+      const { error } = await s.from('lessons').update(patch).eq('lesson_id', +id);
       ok(null, error); return true;
     },
     async recordPayment(p) {

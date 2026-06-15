@@ -64,6 +64,7 @@ export function lessonsView(rows) {
       <td class="num">${fmt$(l.price)}</td>
       <td>${lessonPill(l.status)}</td>
       <td><div class="row-actions">
+        <button class="iconbtn" title="Edit lesson" data-edit="${l.lesson_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         ${['Booked', 'Confirmed'].includes(l.status) ? `<button class="iconbtn" title="Cancel lesson" data-cancel="${l.lesson_id}"><i class="fa-solid fa-ban" aria-hidden="true"></i></button>` : ''}
         <button class="iconbtn del" title="Delete" data-del="${l.lesson_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
       </div></td></tr>`).join('')}</tbody></table></div></div>`;
