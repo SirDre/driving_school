@@ -169,7 +169,7 @@ DECLARE
     v_current_outstanding DECIMAL(10,2);
 BEGIN
     -- Fetch lesson details
-    SELECT customer_id, lesson_date, lesson_time, price, c.amount_outstanding
+    SELECT l.customer_id, l.lesson_date, l.lesson_time, l.price, c.amount_outstanding
     INTO v_customer_id, v_lesson_date, v_lesson_time, v_price, v_current_outstanding
     FROM Lessons l
     JOIN Customers c ON l.customer_id = c.customer_id
