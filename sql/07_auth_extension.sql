@@ -287,10 +287,20 @@ GRANT SELECT ON vw_user_roles  TO authenticated;
 -- Public can register and sign in; only the definer functions touch hashes.
 GRANT EXECUTE ON FUNCTION fn_register(VARCHAR,TEXT,VARCHAR,VARCHAR) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_signin(VARCHAR,TEXT)                   TO anon, authenticated;
+
 -- Role/password management: authenticated only (lock to admins in production).
 GRANT EXECUTE ON FUNCTION fn_assign_role(INT,VARCHAR) TO authenticated;
 GRANT EXECUTE ON FUNCTION fn_revoke_role(INT,VARCHAR) TO authenticated;
 GRANT EXECUTE ON FUNCTION fn_set_password(INT,TEXT)   TO authenticated;
+
+-- For testing/demo purposes, we also grant read access to the active instructors and customer balance views, which include personally identifiable information. In production, you would likely restrict these to staff-only roles or create sanitized versions.
+GRANT SELECT ON driving_school.vw_customer_balance      TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_active_instructors      TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_customer_full_address     TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_instructor_workload    TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_lesson_details    TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_today_lessons   TO anon, authenticated;
+GRANT SELECT ON driving_school.vw_upcoming_lessons   TO anon, authenticated;
 
 
 -- SEED: three demo accounts (CHANGE THESE PASSWORDS). 

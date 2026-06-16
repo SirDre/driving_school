@@ -258,35 +258,6 @@ BEGIN
     DELETE FROM Staff WHERE staff_id = p_staff_id;
 END;
 $$;
- 
--- 2b. Reporting views for the two aggregate reports that the app reads
---     directly (Report 1 uses vw_instructor_workload, Report 3 uses
---     vw_customer_balance, both already defined in script 03).
---     Keeping these as views honours the rule: every JOIN is a view. 
-
--- Report 2: monthly revenue collected, by payment method.
-CREATE OR REPLACE VIEW vw_monthly_revenue AS
-SELECT TO_CHAR(cp.datetime_payment, 'YYYY-MM')       AS pay_month,
-       rpm.payment_method_description                AS method,
-       COUNT(*)                                      AS num_payments,
-       SUM(cp.amount_payment)                        AS total_collected
-FROM Customer_Payments cp
-JOIN Payment_Methods rpm
-     ON cp.payment_method_code = rpm.payment_method_code
-GROUP BY TO_CHAR(cp.datetime_payment, 'YYYY-MM'),
-         rpm.payment_method_description;
-
--- Report 4: vehicle utilisation - completed lessons & revenue per car.
-CREATE OR REPLACE VIEW vw_vehicle_utilisation AS
-SELECT v.vehicle_id,
-       v.vehicle_details,
-       COUNT(l.lesson_id)                                          AS lessons_assigned,
-       COUNT(*) FILTER (WHERE l.lesson_status_code = 'COMP')       AS lessons_completed,
-       COALESCE(SUM(l.price) FILTER
-                (WHERE l.lesson_status_code = 'COMP'), 0)          AS revenue_from_vehicle
-FROM vehicles v
-LEFT JOIN Lessons l ON v.vehicle_id = l.vehicle_id
-GROUP BY v.vehicle_id, v.vehicle_details;
 
  
 CREATE OR REPLACE FUNCTION fn_delete_user (
