@@ -15,11 +15,9 @@
 -- The app calls these by NAME via .rpc(), passing parameters as JSON. 
 
 SET search_path TO driving_school;
-
--- ---------------------------------------------------------------------
+ 
 -- 1. Expose the schema to the Supabase API roles
---    (also add "driving_school" under Settings -> API -> Exposed schemas)
--- ---------------------------------------------------------------------
+--    (also add "driving_school" under Settings -> API -> Exposed schemas) 
 GRANT USAGE ON SCHEMA driving_school TO anon, authenticated, service_role;
 
 -- Read access to tables + views (the app reads the views; tables backing
@@ -33,6 +31,59 @@ GRANT INSERT                 ON driving_school.Customer_Payments TO authenticate
 
 -- IDENTITY sequences need USAGE so inserts can generate keys.
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA driving_school TO authenticated;
+
+
+-- Additional app tables used by the application (authentication/authorization)
+CREATE TABLE app_roles (
+	role_code VARCHAR(50) NOT NULL,
+	role_name VARCHAR(100) NOT NULL,
+	description TEXT,
+	CONSTRAINT pk_app_roles PRIMARY KEY (role_code)
+);
+
+CREATE TABLE app_users (
+	user_id INT GENERATED ALWAYS AS IDENTITY,
+	email VARCHAR(255) NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL,
+	full_name VARCHAR(200),
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	staff_id INT,
+	customer_id INT,
+	failed_attempts INT NOT NULL DEFAULT 0,
+	locked_until TIMESTAMP,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	last_login_at TIMESTAMP,
+	CONSTRAINT pk_app_users PRIMARY KEY (user_id),
+	CONSTRAINT fk_app_users_staff FOREIGN KEY (staff_id) REFERENCES Staff (staff_id) ON DELETE SET NULL,
+	CONSTRAINT fk_app_users_customer FOREIGN KEY (customer_id) REFERENCES Customers (customer_id) ON DELETE SET NULL
+);
+
+CREATE TABLE app_user_roles (
+	user_id INT NOT NULL,
+	role_code VARCHAR(50) NOT NULL,
+	assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT pk_app_user_roles PRIMARY KEY (user_id, role_code),
+	CONSTRAINT fk_aur_user FOREIGN KEY (user_id) REFERENCES app_users (user_id) ON DELETE CASCADE,
+	CONSTRAINT fk_aur_role FOREIGN KEY (role_code) REFERENCES app_roles (role_code) ON DELETE RESTRICT
+);
+
+CREATE TABLE app_login_audit (
+	audit_id BIGINT GENERATED ALWAYS AS IDENTITY,
+	email VARCHAR(255),
+	user_id INT,
+	success BOOLEAN NOT NULL,
+	detail VARCHAR(200),
+	attempted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT pk_app_login_audit PRIMARY KEY (audit_id)
+);
+
+
+-- Additional app tables used by the application (authentication/authorization)
+INSERT INTO app_roles (role_code, role_name, description) VALUES
+('ADMIN',  'Administrator',    'Full administrative access (maps to ds_dba).'),
+('STAFF',  'Front-desk staff', 'Operational booking/payment access (maps to ds_app).'),
+('REPORT', 'Reporting analyst','Read-only access to reports (maps to ds_report).');
+
 
 -- Let the app execute the wrapper functions defined below.
 -- (granted again at the end after the functions exist)
@@ -260,22 +311,20 @@ BEGIN
     DELETE FROM Staff WHERE staff_id = p_staff_id;
 END;
 $$;
-
--- ---------------------------------------------------------------------
+ 
 -- 2b. Reporting views for the two aggregate reports that the app reads
 --     directly (Report 1 uses vw_instructor_workload, Report 3 uses
 --     vw_customer_balance, both already defined in script 03).
---     Keeping these as views honours the rule: every JOIN is a view.
--- ---------------------------------------------------------------------
+--     Keeping these as views honours the rule: every JOIN is a view. 
 
 -- Report 2: monthly revenue collected, by payment method.
 CREATE OR REPLACE VIEW vw_monthly_revenue AS
-SELECT TO_CHAR(cp.datetime_payment, 'YYYY-MM')      AS pay_month,
+SELECT TO_CHAR(cp.datetime_payment, 'YYYY-MM')       AS pay_month,
        rpm.payment_method_description                AS method,
        COUNT(*)                                      AS num_payments,
        SUM(cp.amount_payment)                        AS total_collected
 FROM Customer_Payments cp
-JOIN Ref_Payment_Methods rpm
+JOIN Payment_Methods rpm
      ON cp.payment_method_code = rpm.payment_method_code
 GROUP BY TO_CHAR(cp.datetime_payment, 'YYYY-MM'),
          rpm.payment_method_description;
@@ -341,8 +390,8 @@ $$;
  
 -- 3. Allow the app to execute the wrappers
 --    (staff signatures match the reordered parameters above) 
-GRANT EXECUTE ON FUNCTION fn_book_lesson(INT,INT,INT,DATE,TIME,DECIMAL)        TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION fn_record_payment(INT,VARCHAR,DECIMAL,TEXT)          TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_book_lesson(INT,INT,INT,DATE,TIME,DECIMAL)         TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_record_payment(INT,VARCHAR,DECIMAL,TEXT)           TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_cancel_lesson(INT)                                 TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_add_customer(INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_update_customer(INT,INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
@@ -351,12 +400,12 @@ GRANT EXECUTE ON FUNCTION fn_update_customer(INT,INT,VARCHAR,DATE,DATE,VARCHAR,V
 GRANT SELECT ON vw_monthly_revenue, vw_vehicle_utilisation TO anon, authenticated;
 
 
-GRANT EXECUTE ON FUNCTION fn_delete_customer(INT)                TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_delete_customer(INT)                                TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_lesson(INT)                   TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_add_staff(INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_update_staff(INT,INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_staff(INT)                    TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_delete_user(INT)                    TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION driving_school.fn_delete_user(INT)                     TO anon, authenticated;
 
 
 -- Least privilege: PostgreSQL grants EXECUTE to PUBLIC by default, which

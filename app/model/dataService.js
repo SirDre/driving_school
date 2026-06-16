@@ -42,9 +42,9 @@ export function makeLiveDB(sb) {
   return {
     async refData() {
 
-      const cs = await s.from('ref_customer_status').select('*');
-      const ls = await s.from('ref_lesson_status').select('*');
-      const pm = await s.from('ref_payment_methods').select('*');
+      const cs = await s.from('customer_status').select('*');
+      const ls = await s.from('lesson_status').select('*');
+      const pm = await s.from('payment_methods').select('*');
       const st = await s.from('staff').select('staff_id,first_name,last_name,date_left_staff,other_staff_details');
       const vh = await s.from('vehicles').select('*');
       const cu = await s.from('customers').select('customer_id,first_name,last_name,customer_status_code');
@@ -185,7 +185,7 @@ export function makeLiveDB(sb) {
 
     // --- Lessons & payments (write through stored-procedure wrappers) ---
     async bookLesson(p) {
-      const { data, error } = await sb.schema('driving_school').rpc('fn_book_lesson', {
+      const { data, error } = await s.rpc('fn_book_lesson', {
         p_customer_id: +p.cust, p_staff_id: p.staff ? +p.staff : null, p_vehicle_id: p.veh ? +p.veh : null,
         p_date: p.date, p_time: p.time, p_price: +p.price,
       });
@@ -222,12 +222,12 @@ export function makeLiveDB(sb) {
       ok(null, error); return true;
     },
     async recordPayment(p) {
-      const { error } = await sb.schema('driving_school').rpc('fn_record_payment', {
+      const { error } = await s.rpc('fn_record_payment', {
         p_customer_id: +p.cust, p_method: p.method, p_amount: +p.amt, p_details: p.notes || null,
       });
       ok(null, error); return true;
     },
-    async cancelLesson(id) { const { error } = await sb.schema('driving_school').rpc('fn_cancel_lesson', { p_lesson_id: id }); ok(null, error); return 'done'; },
-    async deleteLesson(id) { const { error } = await sb.schema('driving_school').rpc('fn_delete_lesson', { p_lesson_id: +id }); ok(null, error); return true; },
+    async cancelLesson(id) { const { error } = await s.rpc('fn_cancel_lesson', { p_lesson_id: id }); ok(null, error); return 'done'; },
+    async deleteLesson(id) { const { error } = await s.rpc('fn_delete_lesson', { p_lesson_id: +id }); ok(null, error); return true; },
   };
 }

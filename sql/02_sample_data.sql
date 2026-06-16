@@ -8,15 +8,15 @@
 
 USE driving_school;  
 
-INSERT INTO Ref_Customer_Status (customer_status_code, customer_status_description) VALUES
+INSERT INTO Customer_Status (customer_status_code, customer_status_description) VALUES
 ('ACT','Active'),('INA','Inactive'),('SUS','Suspended for non-payment'),
 ('PASS','Passed test - archived'),('LEAD','Prospective lead, not yet enrolled');
 
-INSERT INTO Ref_Lesson_Status (lesson_status_code, lesson_status_description) VALUES
+INSERT INTO Lesson_Status (lesson_status_code, lesson_status_description) VALUES
 ('BOOK','Booked'),('CONF','Confirmed'),('COMP','Completed'),
 ('CANC','Cancelled by customer'),('NOSH','No show'),('RESC','Rescheduled');
 
-INSERT INTO Ref_Payment_Methods (payment_method_code, payment_method_description) VALUES
+INSERT INTO Payment_Methods (payment_method_code, payment_method_description) VALUES
 ('CASH','Cash'),('CARD','Debit / Credit card'),('BANK','Bank transfer / Interac e-Transfer'),
 ('DD','Pre-authorized debit'),('VOUCH','Gift voucher');
 
@@ -93,9 +93,3 @@ INSERT INTO Customer_Payments
 (7,'2024-05-20 10:00:00','CARD',65.00,'Paid in full'),
 (8,'2024-06-02 15:45:00','VOUCH',10.00,'Gift voucher - part payment');
 
-
--- Additional app tables used by the application (authentication/authorization)
-INSERT INTO app_roles (role_code, role_name, description) VALUES
-('ADMIN',  'Administrator',    'Full administrative access (maps to ds_dba).'),
-('STAFF',  'Front-desk staff', 'Operational booking/payment access (maps to ds_app).'),
-('REPORT', 'Reporting analyst','Read-only access to reports (maps to ds_report).');

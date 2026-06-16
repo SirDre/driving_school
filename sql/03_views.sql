@@ -31,7 +31,7 @@ SELECT
 	a.other_address_details
 FROM driving_school.customers c
 LEFT JOIN driving_school.addresses a ON c.customer_address_id = a.address_id
-LEFT JOIN driving_school.ref_customer_status s ON c.customer_status_code = s.customer_status_code;
+LEFT JOIN driving_school.customer_status s ON c.customer_status_code = s.customer_status_code;
 
 CREATE OR REPLACE VIEW driving_school.view_staff AS
 SELECT
@@ -55,7 +55,7 @@ SELECT
 	a.country
 FROM driving_school.staff st
 LEFT JOIN driving_school.addresses a ON st.staff_address_id = a.address_id
-LEFT JOIN driving_school.ref_customer_status s ON st.customer_status_code = s.customer_status_code;
+LEFT JOIN driving_school.customer_status s ON st.customer_status_code = s.customer_status_code;
 
 CREATE OR REPLACE VIEW driving_school.view_lessons AS
 SELECT
@@ -76,7 +76,7 @@ SELECT
 	l.lesson_status_code,
 	ls.lesson_status_description
 FROM driving_school.lessons l
-LEFT JOIN driving_school.ref_lesson_status ls ON l.lesson_status_code = ls.lesson_status_code
+LEFT JOIN driving_school.lesson_status ls ON l.lesson_status_code = ls.lesson_status_code
 LEFT JOIN driving_school.customers c ON l.customer_id = c.customer_id
 LEFT JOIN driving_school.staff st ON l.staff_id = st.staff_id
 LEFT JOIN driving_school.vehicles v ON l.vehicle_id = v.vehicle_id;
@@ -92,7 +92,7 @@ SELECT
 	cp.amount_payment,
 	cp.other_payment_details
 FROM driving_school.customer_payments cp
-LEFT JOIN driving_school.ref_payment_methods pm ON cp.payment_method_code = pm.payment_method_code
+LEFT JOIN driving_school.payment_methods pm ON cp.payment_method_code = pm.payment_method_code
 LEFT JOIN driving_school.customers c ON cp.customer_id = c.customer_id;
 
 CREATE OR REPLACE VIEW driving_school.view_user_roles AS
@@ -148,7 +148,7 @@ SELECT
 	st.last_name AS staff_last_name,
 	v.vehicle_details
 FROM driving_school.lessons l
-LEFT JOIN driving_school.ref_lesson_status ls ON l.lesson_status_code = ls.lesson_status_code
+LEFT JOIN driving_school.lesson_status ls ON l.lesson_status_code = ls.lesson_status_code
 LEFT JOIN driving_school.customers c ON l.customer_id = c.customer_id
 LEFT JOIN driving_school.staff st ON l.staff_id = st.staff_id
 LEFT JOIN driving_school.vehicles v ON l.vehicle_id = v.vehicle_id;

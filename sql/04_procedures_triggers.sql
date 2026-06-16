@@ -115,7 +115,7 @@ BEGIN
     END IF;
 
     -- Validate payment method exists
-    IF NOT EXISTS (SELECT 1 FROM Ref_Payment_Methods WHERE payment_method_code = p_payment_method) THEN
+    IF NOT EXISTS (SELECT 1 FROM Payment_Methods WHERE payment_method_code = p_payment_method) THEN
         RAISE EXCEPTION 'Payment method % does not exist', p_payment_method;
     END IF;
 

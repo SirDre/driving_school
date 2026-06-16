@@ -19,7 +19,7 @@ SELECT
     MIN(cp.amount_payment) AS min_payment_amount,
     MAX(cp.amount_payment) AS max_payment_amount
 FROM customer_payments cp
-LEFT JOIN ref_payment_methods pm ON cp.payment_method_code = pm.payment_method_code
+LEFT JOIN payment_methods pm ON cp.payment_method_code = pm.payment_method_code
 GROUP BY DATE_TRUNC('month', cp.datetime_payment), pm.payment_method_description
 ORDER BY month DESC, total_revenue DESC;
 
