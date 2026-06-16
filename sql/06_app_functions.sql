@@ -163,6 +163,63 @@ BEGIN
 END;
 $$;
 
+-- Resolve an address by its components, or create it if it does not exist.
+-- Returns the address_id so the app can store the foreign key directly.
+CREATE OR REPLACE FUNCTION driving_school.fn_resolve_address (
+    p_city     VARCHAR(100),
+    p_country  VARCHAR(100),
+    p_line1    VARCHAR(100),
+    p_line2    VARCHAR(100),
+    p_line3    VARCHAR(100),
+    p_postcode VARCHAR(20),
+    p_province VARCHAR(100)
+) RETURNS INT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = driving_school, public
+AS $$
+DECLARE
+    v_address_id INT;
+BEGIN
+    SELECT address_id
+      INTO v_address_id
+      FROM Addresses
+     WHERE city = p_city
+       AND COALESCE(country, 'Canada') = COALESCE(p_country, 'Canada')
+       AND line_1_number_building = p_line1
+       AND line_2_number_street IS NOT DISTINCT FROM p_line2
+       AND line_3_area_locality IS NOT DISTINCT FROM p_line3
+       AND zip_postcode = p_postcode
+       AND state_province_county IS NOT DISTINCT FROM p_province
+     LIMIT 1;
+
+    IF v_address_id IS NOT NULL THEN
+        RETURN v_address_id;
+    END IF;
+
+    INSERT INTO Addresses (
+        line_1_number_building,
+        line_2_number_street,
+        line_3_area_locality,
+        city,
+        zip_postcode,
+        state_province_county,
+        country
+    ) VALUES (
+        p_line1,
+        p_line2,
+        p_line3,
+        p_city,
+        p_postcode,
+        p_province,
+        COALESCE(p_country, 'Canada')
+    )
+    RETURNING address_id INTO v_address_id;
+
+    RETURN v_address_id;
+END;
+$$;
+
 -- Delete a lesson record.
 CREATE OR REPLACE FUNCTION driving_school.fn_delete_lesson (
     p_lesson_id INT
@@ -314,7 +371,6 @@ GRANT EXECUTE ON FUNCTION fn_cancel_lesson(INT)                                 
 GRANT EXECUTE ON FUNCTION fn_add_customer(INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_update_customer(INT,INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
 
-
 GRANT SELECT ON vw_monthly_revenue, vw_vehicle_utilisation TO anon, authenticated;
 
 
@@ -324,6 +380,8 @@ GRANT EXECUTE ON FUNCTION driving_school.fn_add_staff(INT,VARCHAR,VARCHAR,VARCHA
 GRANT EXECUTE ON FUNCTION driving_school.fn_update_staff(INT,INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_staff(INT)                    TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_user(INT)                     TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION driving_school.fn_resolve_address(VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
+
 
 
 -- Least privilege: PostgreSQL grants EXECUTE to PUBLIC by default, which
