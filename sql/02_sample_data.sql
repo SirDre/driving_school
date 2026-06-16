@@ -6,7 +6,7 @@
 -- otherwise load triggers first and let them recompute balances. 
 -- Character set: UTF-8
 
-USE driving_school;  
+SET search_path TO driving_school;
 
 INSERT INTO Customer_Status (customer_status_code, customer_status_description) VALUES
 ('ACT','Active'),('INA','Inactive'),('SUS','Suspended for non-payment'),
@@ -93,3 +93,9 @@ INSERT INTO Customer_Payments
 (7,'2024-05-20 10:00:00','CARD',65.00,'Paid in full'),
 (8,'2024-06-02 15:45:00','VOUCH',10.00,'Gift voucher - part payment');
 
+
+-- Additional app tables used by the application (authentication/authorization)
+INSERT INTO app_roles (role_code, role_name, description) VALUES
+('ADMIN',  'Administrator',    'Full administrative access (maps to ds_dba).'),
+('STAFF',  'Front-desk staff', 'Operational booking/payment access (maps to ds_app).'),
+('REPORT', 'Reporting analyst','Read-only access to reports (maps to ds_report).');

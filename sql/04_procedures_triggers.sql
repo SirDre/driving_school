@@ -51,7 +51,7 @@ BEGIN
                    AND lesson_date = p_date 
                    AND lesson_time = p_time
                    AND lesson_status_code != 'CANCELLED') THEN
-            RAISE EXCEPTION 'Staff % is already booked at %:% on %', p_staff_id, p_time, p_date;
+            RAISE EXCEPTION 'Staff % is already booked at % on %', p_staff_id, p_time, p_date;
         END IF;
     END IF;
 
@@ -62,7 +62,7 @@ BEGIN
                    AND lesson_date = p_date 
                    AND lesson_time = p_time
                    AND lesson_status_code != 'CANCELLED') THEN
-            RAISE EXCEPTION 'Vehicle % is already booked at %:% on %', p_vehicle_id, p_time, p_date;
+            RAISE EXCEPTION 'Vehicle % is already booked at % on %', p_vehicle_id, p_time, p_date;
         END IF;
     END IF;
 

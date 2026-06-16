@@ -3,8 +3,8 @@
 -- 05_reports.sql  -  4 analytical reports (insight, not table dumps) 
 -- Character set: UTF-8
 
-USE driving_school;
- 
+SET search_path TO driving_school;
+
 -- REPORT 1: Revenue & Collections Analysis
 -- Purpose: Monitor cash flow, payment methods, and collection efficiency 
 
@@ -50,8 +50,8 @@ SELECT
     SUM(l.price) AS total_lesson_revenue,
     ROUND(AVG(l.price), 2) AS avg_lesson_price,
     COUNT(DISTINCT l.customer_id) AS unique_students,
-    DATEDIFF(CURRENT_DATE, MIN(l.lesson_date)) AS days_since_first_lesson,
-    DATEDIFF(CURRENT_DATE, MAX(l.lesson_date)) AS days_since_last_lesson,
+    CURRENT_DATE - MIN(l.lesson_date) AS days_since_first_lesson,
+    CURRENT_DATE - MAX(l.lesson_date) AS days_since_last_lesson,
     st.date_joined_staff,
     CASE 
         WHEN st.date_left_staff IS NULL THEN 'Active'
@@ -107,11 +107,16 @@ FROM (
     GROUP BY c.customer_id
 ) customer_metrics
 WHERE lifetime_value >= (
-    SELECT PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY COALESCE(SUM(cp.amount_payment), 0))
-    FROM customers c
-    LEFT JOIN customer_payments cp ON c.customer_id = cp.customer_id
-    WHERE c.customer_status_code = 'ACTIVE'
-    GROUP BY c.customer_id
+    SELECT PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY lifetime_value)
+    FROM (
+        SELECT
+            c.customer_id,
+            COALESCE(SUM(cp.amount_payment), 0) AS lifetime_value
+        FROM customers c
+        LEFT JOIN customer_payments cp ON c.customer_id = cp.customer_id
+        WHERE c.customer_status_code = 'ACTIVE'
+        GROUP BY c.customer_id
+    ) active_customer_values
 )
 UNION ALL
 SELECT
@@ -134,11 +139,16 @@ FROM (
     GROUP BY c.customer_id
 ) customer_metrics
 WHERE outstanding_balance > 500 AND lifetime_value < (
-    SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY COALESCE(SUM(cp.amount_payment), 0))
-    FROM customers c
-    LEFT JOIN customer_payments cp ON c.customer_id = cp.customer_id
-    WHERE c.customer_status_code = 'ACTIVE'
-    GROUP BY c.customer_id
+    SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY lifetime_value)
+    FROM (
+        SELECT
+            c.customer_id,
+            COALESCE(SUM(cp.amount_payment), 0) AS lifetime_value
+        FROM customers c
+        LEFT JOIN customer_payments cp ON c.customer_id = cp.customer_id
+        WHERE c.customer_status_code = 'ACTIVE'
+        GROUP BY c.customer_id
+    ) active_customer_values
 );
  
 -- REPORT 4: Lesson Booking & Utilization Analysis
@@ -146,7 +156,7 @@ WHERE outstanding_balance > 500 AND lifetime_value < (
 CREATE OR REPLACE VIEW vw_scheduling_efficiency AS
 SELECT
     DATE_TRUNC('week', l.lesson_date)::DATE AS week_starting,
-    DAYOFWEEK(l.lesson_date) AS day_of_week,
+    EXTRACT(DOW FROM l.lesson_date) AS day_of_week,
     EXTRACT(HOUR FROM l.lesson_time) AS lesson_hour,
     l.lesson_status_code,
     COUNT(DISTINCT l.lesson_id) AS lessons_booked,
@@ -155,7 +165,7 @@ SELECT
     ROUND(AVG(l.price), 2) AS avg_lesson_price,
     SUM(l.price) AS weekly_revenue
 FROM lessons l
-GROUP BY DATE_TRUNC('week', l.lesson_date), DAYOFWEEK(l.lesson_date), EXTRACT(HOUR FROM l.lesson_time), l.lesson_status_code
+GROUP BY DATE_TRUNC('week', l.lesson_date), EXTRACT(DOW FROM l.lesson_date), EXTRACT(HOUR FROM l.lesson_time), l.lesson_status_code
 ORDER BY week_starting DESC, day_of_week, lesson_hour;
 
 -- Lesson completion rates by status
@@ -172,5 +182,5 @@ SELECT
     ROUND(SUM(CASE WHEN l.lesson_status_code IN ('COMP', 'CONF') THEN l.price ELSE 0 END), 2) AS completed_revenue,
     ROUND(SUM(CASE WHEN l.lesson_status_code = 'CANC' THEN l.price ELSE 0 END), 2) AS lost_revenue_cancelled
 FROM lessons l
-WHERE l.lesson_date >= DATE_SUB(CURRENT_DATE, INTERVAL 90 DAY);
+WHERE l.lesson_date >= CURRENT_DATE - INTERVAL '90 days';
  

@@ -2,10 +2,7 @@
 -- Driving School Booking & Payment System
 -- 01_schema_ddl.sql  -  Data Definition Language for postgreSQL 15
 -- Character set: UTF-8
- 
 
-DROP SCHEMA IF EXISTS driving_school CASCADE;
-CREATE SCHEMA driving_school;
 SET search_path TO driving_school;
 
 CREATE TABLE Customer_Status (

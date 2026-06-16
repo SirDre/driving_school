@@ -4,7 +4,7 @@
 -- is implemented here as a view (requirement: minimum 5 views).
 -- Character set: UTF-8
  
-USE driving_school;
+SET search_path TO driving_school;
 
 CREATE OR REPLACE VIEW driving_school.view_customers AS
 SELECT
