@@ -97,7 +97,7 @@ CREATE OR REPLACE FUNCTION fn_add_customer (
     p_last_name      VARCHAR(50),
     p_email          VARCHAR(150) DEFAULT NULL,
     p_cell           VARCHAR(30) DEFAULT NULL
-) RETURNS INT
+) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = driving_school, public
@@ -173,7 +173,7 @@ CREATE OR REPLACE FUNCTION driving_school.fn_resolve_address (
     p_line3    VARCHAR(100),
     p_postcode VARCHAR(20),
     p_province VARCHAR(100)
-) RETURNS INT
+) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = driving_school, public
@@ -194,7 +194,7 @@ BEGIN
      LIMIT 1;
 
     IF v_address_id IS NOT NULL THEN
-        RETURN v_address_id;
+        RETURN jsonb_build_object('address_id', v_address_id);
     END IF;
 
     INSERT INTO Addresses (
@@ -216,7 +216,7 @@ BEGIN
     )
     RETURNING address_id INTO v_address_id;
 
-    RETURN v_address_id;
+    RETURN jsonb_build_object('address_id', v_address_id);
 END;
 $$;
 

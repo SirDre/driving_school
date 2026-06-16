@@ -130,7 +130,10 @@ export function makeLiveDB(sb) {
         p_line3: a.line_3_area_locality || null, p_city: a.city || null, p_postcode: a.zip_postcode || null,
         p_province: a.state_province_county || null, p_country: a.country || null,
       });
-      return ok(data, error);
+      const result = ok(data, error);
+      if (Array.isArray(result)) return result[0]?.address_id ?? result[0] ?? null;
+      if (result && typeof result === 'object') return result.address_id ?? null;
+      return result;
     },
 
     // --- Customers ---

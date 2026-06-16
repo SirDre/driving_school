@@ -25,7 +25,7 @@ AS $$
 BEGIN
     -- Validate customer exists and is ACTIVE
     IF NOT EXISTS (SELECT 1 FROM Customers WHERE customer_id = p_customer_id 
-                   AND customer_status_code = 'ACTIVE') THEN
+                   AND customer_status_code = 'ACT') THEN
         RAISE EXCEPTION 'Customer % does not exist or is not active', p_customer_id;
     END IF;
 
