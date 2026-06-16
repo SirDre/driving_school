@@ -115,22 +115,6 @@ INSERT INTO app_roles (role_code, role_name, description) VALUES
 ON CONFLICT (role_code) DO NOTHING;
 
 
--- SAFE VIEWS (never expose the password hash) 
-CREATE OR REPLACE VIEW vw_app_users AS
-SELECT u.user_id, u.email, u.full_name, u.is_active,
-       u.staff_id, u.customer_id, u.created_at, u.last_login_at,
-       COALESCE(
-         (SELECT string_agg(r.role_code, ',' ORDER BY r.role_code)
-          FROM app_user_roles r WHERE r.user_id = u.user_id), '') AS roles
-FROM app_users u;
-
-CREATE OR REPLACE VIEW vw_user_roles AS
-SELECT ur.user_id, u.email, ur.role_code, ro.role_name, ur.assigned_at
-FROM app_user_roles ur
-JOIN app_users u  ON ur.user_id = u.user_id
-JOIN app_roles ro ON ur.role_code = ro.role_code;
-
- 
 -- FUNCTION: register a new account.  Returns JSONB {ok, ...}. 
 CREATE OR REPLACE FUNCTION fn_register (
     p_email     VARCHAR(150),
@@ -272,6 +256,23 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'message', 'Password updated.');
 END; $$;
 
+
+
+-- SAFE VIEWS (never expose the password hash) 
+CREATE OR REPLACE VIEW vw_app_users AS
+SELECT u.user_id, u.email, u.full_name, u.is_active,
+       u.staff_id, u.customer_id, u.created_at, u.last_login_at,
+       COALESCE(
+         (SELECT string_agg(r.role_code, ',' ORDER BY r.role_code)
+          FROM app_user_roles r WHERE r.user_id = u.user_id), '') AS roles
+FROM app_users u;
+
+CREATE OR REPLACE VIEW vw_user_roles AS
+SELECT ur.user_id, u.email, ur.role_code, ro.role_name, ur.assigned_at
+FROM app_user_roles ur
+JOIN app_users u  ON ur.user_id = u.user_id
+JOIN app_roles ro ON ur.role_code = ro.role_code;
+
  
 -- GRANTS  (least privilege) 
 -- The credentials table is NEVER directly readable by API roles.
@@ -282,7 +283,7 @@ REVOKE ALL ON app_login_audit  FROM anon, authenticated;
 -- Read-only catalogue + safe views.
 GRANT SELECT ON app_roles      TO anon, authenticated;
 GRANT SELECT ON vw_app_users   TO authenticated;
-GRANT SELECT ON vw_user_roles  TO authenticated;
+GRANT SELECT ON vw_user_roles  TO anon, authenticated;
 
 -- Public can register and sign in; only the definer functions touch hashes.
 GRANT EXECUTE ON FUNCTION fn_register(VARCHAR,TEXT,VARCHAR,VARCHAR) TO anon, authenticated;
@@ -293,7 +294,8 @@ GRANT EXECUTE ON FUNCTION fn_assign_role(INT,VARCHAR) TO authenticated;
 GRANT EXECUTE ON FUNCTION fn_revoke_role(INT,VARCHAR) TO authenticated;
 GRANT EXECUTE ON FUNCTION fn_set_password(INT,TEXT)   TO authenticated;
 
--- For testing/demo purposes, we also grant read access to the active instructors and customer balance views, which include personally identifiable information. In production, you would likely restrict these to staff-only roles or create sanitized versions.
+-- For testing/demo purposes, we also grant read access to the active instructors and customer balance views, which include personally identifiable information. 
+-- In production, you would likely restrict these to staff-only roles or create sanitized versions.
 GRANT SELECT ON driving_school.vw_customer_balance      TO anon, authenticated;
 GRANT SELECT ON driving_school.vw_active_instructors      TO anon, authenticated;
 GRANT SELECT ON driving_school.vw_customer_full_address     TO anon, authenticated;
