@@ -49,6 +49,7 @@ CREATE OR REPLACE FUNCTION fn_book_lesson (
     p_price       DECIMAL(10,2)
 ) RETURNS INT
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = driving_school, public
 AS $$
 DECLARE
@@ -68,6 +69,7 @@ CREATE OR REPLACE FUNCTION fn_record_payment (
     p_details     TEXT DEFAULT NULL
 ) RETURNS VOID
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = driving_school, public
 AS $$
 BEGIN
@@ -80,6 +82,7 @@ CREATE OR REPLACE FUNCTION fn_cancel_lesson (
     p_lesson_id INT
 ) RETURNS VOID
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = driving_school, public
 AS $$
 BEGIN
