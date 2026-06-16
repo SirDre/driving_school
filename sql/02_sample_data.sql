@@ -65,7 +65,7 @@ INSERT INTO Customers
 (1,'PASS','2023-09-12','2002-06-14','Oliver','Bennett',0.00,'oliver.bennett@example.ca','(403) 555-0107','(587) 555-0117'),
 (4,'ACT','2024-05-18','2008-02-28','Maya','Singh',0.00,'maya.singh@example.ca','(403) 555-0108','(587) 555-0118');
 
-INSERT INTO Lessons
+INSERT INTO lessons
 (customer_id, lesson_status_code, staff_id, vehicle_id, lesson_date, lesson_time, price, other_lesson_details) VALUES
 (1,'COMP',1,1,'2024-06-03','09:00:00',65.00,'Introductory lesson - residential streets'),
 (1,'COMP',1,1,'2024-06-10','09:00:00',70.00,'Traffic circles and merging'),

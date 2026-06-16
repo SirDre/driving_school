@@ -233,6 +233,40 @@ BEGIN
 END;
 $$;
 
+-- Update a lesson record.
+CREATE OR REPLACE FUNCTION driving_school.fn_update_lesson (
+    p_lesson_id    INT,
+    p_customer_id  INT,
+    p_staff_id     INT,
+    p_vehicle_id   INT,
+    p_date         DATE,
+    p_time         TIME,
+    p_price        DECIMAL(10,2),
+    p_notes        TEXT DEFAULT NULL,
+    p_status_code  VARCHAR(10) DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = driving_school, public
+AS $$
+BEGIN
+    UPDATE Lessons
+       SET customer_id = p_customer_id,
+           staff_id = p_staff_id,
+           vehicle_id = p_vehicle_id,
+           lesson_date = p_date,
+           lesson_time = p_time,
+           price = p_price,
+           other_lesson_details = p_notes,
+           lesson_status_code = COALESCE(p_status_code, lesson_status_code)
+     WHERE lesson_id = p_lesson_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Lesson % does not exist', p_lesson_id;
+    END IF;
+END;
+$$;
+
 -- Insert an instructor/staff row and return the new staff_id.
 -- NOTE: required parameters first, optional (DEFAULT NULL) parameters last.
 CREATE OR REPLACE FUNCTION driving_school.fn_add_staff (
@@ -376,6 +410,7 @@ GRANT SELECT ON vw_monthly_revenue, vw_vehicle_utilisation TO anon, authenticate
 
 GRANT EXECUTE ON FUNCTION fn_delete_customer(INT)                                TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_lesson(INT)                   TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION driving_school.fn_update_lesson(INT,INT,INT,INT,DATE,TIME,DECIMAL,TEXT,VARCHAR) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_add_staff(INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_update_staff(INT,INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION driving_school.fn_delete_staff(INT)                    TO anon, authenticated;

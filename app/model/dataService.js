@@ -210,19 +210,19 @@ export function makeLiveDB(sb) {
       };
     },
     async updateLesson(id, p) {
-      const patch = {
-        customer_id: +p.cust,
-        staff_id: p.staff ? +p.staff : null,
-        vehicle_id: p.veh ? +p.veh : null,
-        lesson_date: p.date,
-        lesson_time: p.time,
-        price: +p.price,
-        other_lesson_details: p.notes || null,
-      };
-      if (p.status_code) patch.lesson_status_code = p.status_code;
-
-      const { error } = await s.from('lessons').update(patch).eq('lesson_id', +id);
-      ok(null, error); return true;
+      const { error } = await s.rpc('fn_update_lesson', {
+        p_lesson_id: +id,
+        p_customer_id: +p.cust,
+        p_staff_id: p.staff ? +p.staff : null,
+        p_vehicle_id: p.veh ? +p.veh : null,
+        p_date: p.date,
+        p_time: p.time,
+        p_price: +p.price,
+        p_notes: p.notes || null,
+        p_status_code: p.status_code || null,
+      });
+      ok(null, error);
+      return true;
     },
     async recordPayment(p) {
       const { error } = await s.rpc('fn_record_payment', {

@@ -25,7 +25,7 @@ AS $$
 BEGIN
     -- Validate customer exists and is ACTIVE
     IF NOT EXISTS (SELECT 1 FROM Customers WHERE customer_id = p_customer_id 
-                   AND customer_status_code = 'ACTIVE') THEN
+                   AND customer_status_code = 'ACT') THEN
         RAISE EXCEPTION 'Customer % does not exist or is not active', p_customer_id;
     END IF;
 
@@ -50,7 +50,7 @@ BEGIN
                    WHERE staff_id = p_staff_id 
                    AND lesson_date = p_date 
                    AND lesson_time = p_time
-                   AND lesson_status_code != 'CANCELLED') THEN
+                   AND lesson_status_code != 'CANC') THEN
             RAISE EXCEPTION 'Staff % is already booked at % on %', p_staff_id, p_time, p_date;
         END IF;
     END IF;
@@ -61,7 +61,7 @@ BEGIN
                    WHERE vehicle_id = p_vehicle_id 
                    AND lesson_date = p_date 
                    AND lesson_time = p_time
-                   AND lesson_status_code != 'CANCELLED') THEN
+                   AND lesson_status_code != 'CANC') THEN
             RAISE EXCEPTION 'Vehicle % is already booked at % on %', p_vehicle_id, p_time, p_date;
         END IF;
     END IF;
@@ -82,7 +82,7 @@ BEGIN
         p_date, 
         p_time, 
         p_price, 
-        'BOOKED'
+        'BOOK'
     )
     RETURNING lesson_id INTO p_lesson_id;
 
@@ -181,12 +181,12 @@ BEGIN
     END IF;
 
     -- Check lesson is not already cancelled
-    IF EXISTS (SELECT 1 FROM Lessons WHERE lesson_id = p_lesson_id AND lesson_status_code = 'CANCELLED') THEN
+    IF EXISTS (SELECT 1 FROM Lessons WHERE lesson_id = p_lesson_id AND lesson_status_code = 'CANC') THEN
         RAISE EXCEPTION 'Lesson % is already cancelled', p_lesson_id;
     END IF;
 
     -- Check lesson is not already completed
-    IF EXISTS (SELECT 1 FROM Lessons WHERE lesson_id = p_lesson_id AND lesson_status_code = 'COMPLETED') THEN
+    IF EXISTS (SELECT 1 FROM Lessons WHERE lesson_id = p_lesson_id AND lesson_status_code = 'COMP') THEN
         RAISE EXCEPTION 'Cannot cancel completed lesson %', p_lesson_id;
     END IF;
 
@@ -204,7 +204,7 @@ BEGIN
 
     -- Update lesson status to CANCELLED
     UPDATE Lessons 
-    SET lesson_status_code = 'CANCELLED'
+    SET lesson_status_code = 'CANC'
     WHERE lesson_id = p_lesson_id;
 
     -- Update customer balance: remove lesson price, add back any refund (price - fee)
@@ -250,7 +250,7 @@ BEGIN
             WHERE staff_id = NEW.staff_id
             AND lesson_date = NEW.lesson_date
             AND lesson_time = NEW.lesson_time
-            AND lesson_status_code != 'CANCELLED'
+            AND lesson_status_code != 'CANC'
             AND lesson_id != COALESCE(OLD.lesson_id, -1)  -- Exclude current lesson on UPDATE
         ) THEN
             RAISE EXCEPTION 'Staff % is already booked at % on %', 
@@ -265,7 +265,7 @@ BEGIN
             WHERE vehicle_id = NEW.vehicle_id
             AND lesson_date = NEW.lesson_date
             AND lesson_time = NEW.lesson_time
-            AND lesson_status_code != 'CANCELLED'
+            AND lesson_status_code != 'CANC'
             AND lesson_id != COALESCE(OLD.lesson_id, -1)  -- Exclude current lesson on UPDATE
         ) THEN
             RAISE EXCEPTION 'Vehicle % is already booked at % on %', 

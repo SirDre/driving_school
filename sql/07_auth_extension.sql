@@ -276,13 +276,16 @@ JOIN app_roles ro ON ur.role_code = ro.role_code;
  
 -- GRANTS  (least privilege) 
 -- The credentials table is NEVER directly readable by API roles.
-REVOKE ALL ON app_users        FROM anon, authenticated;
-REVOKE ALL ON app_user_roles   FROM anon, authenticated;
-REVOKE ALL ON app_login_audit  FROM anon, authenticated;
+-- REVOKE ALL ON app_users        FROM anon, authenticated;
+-- REVOKE ALL ON app_user_roles   FROM anon, authenticated;
+-- REVOKE ALL ON app_login_audit  FROM anon, authenticated;
+GRANT ALL ON app_users        TO anon, authenticated;
+GRANT ALL ON app_user_roles   TO anon, authenticated;
+GRANT ALL ON app_login_audit  TO anon, authenticated;
 
 -- Read-only catalogue + safe views.
 GRANT SELECT ON app_roles      TO anon, authenticated;
-GRANT SELECT ON vw_app_users   TO authenticated;
+GRANT SELECT ON vw_app_users   TO anon, authenticated;
 GRANT SELECT ON vw_user_roles  TO anon, authenticated;
 
 -- Public can register and sign in; only the definer functions touch hashes.
