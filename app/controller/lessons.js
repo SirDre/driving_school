@@ -100,7 +100,7 @@ function confirmDeleteLesson(l) {
   };
 }
 
-function confirmCancelLesson(l) {
+function confirmCancelLesson(lessonId) {
   openModal(cancelLessonHTML());
 
   // set up the cancel button to close the modal.
@@ -110,7 +110,7 @@ function confirmCancelLesson(l) {
   $('go').onclick = async () => {
 
     // call the model to cancel the lesson and get the result to determine the toast message
-    const r = await state.db.cancelLesson(l.lesson_id);
+    const r = await state.db.cancelLesson(lessonId);
 
     // show success message based on the result
     toast(r === 'late' ? 'Cancelled late — kept billable as No show.' : 'Lesson cancelled.');

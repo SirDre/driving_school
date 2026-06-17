@@ -230,7 +230,7 @@ export function makeLiveDB(sb) {
       });
       ok(null, error); return true;
     },
-    async cancelLesson(id) { const { error } = await s.rpc('fn_cancel_lesson', { p_lesson_id: id }); ok(null, error); return 'done'; },
+    async cancelLesson(id) { const { error } = await s.rpc('fn_cancel_lesson', { p_lesson_id: +id }); ok(null, error); return 'done'; },
     async deleteLesson(id) { const { error } = await s.rpc('fn_delete_lesson', { p_lesson_id: +id }); ok(null, error); return true; },
   };
 }
