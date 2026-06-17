@@ -462,13 +462,13 @@ GRANT SELECT ON vw_monthly_revenue, vw_vehicle_utilisation TO anon, authenticate
 
 
 GRANT EXECUTE ON FUNCTION fn_delete_customer(INT)                                TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_delete_lesson(INT)                   TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_update_lesson(INT,INT,INT,INT,DATE,TIME,DECIMAL,TEXT,VARCHAR) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_add_staff(INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_update_staff(INT,INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_delete_staff(INT)                    TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_delete_user(INT)                     TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION driving_school.fn_resolve_address(VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_delete_lesson(INT)                   TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_update_lesson(INT,INT,INT,INT,DATE,TIME,DECIMAL,TEXT,VARCHAR) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_add_staff(INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_update_staff(INT,INT,VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,DATE,TIMESTAMP,TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_delete_staff(INT)                    TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_delete_user(INT)                     TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_resolve_address(VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
 
 
 

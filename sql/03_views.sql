@@ -6,7 +6,7 @@
  
 SET search_path TO driving_school;
 
-CREATE OR REPLACE VIEW driving_school.view_customers AS
+CREATE OR REPLACE VIEW view_customers AS
 SELECT
 	c.customer_id,
 	c.first_name,
@@ -33,7 +33,7 @@ FROM driving_school.customers c
 LEFT JOIN driving_school.addresses a ON c.customer_address_id = a.address_id
 LEFT JOIN driving_school.customer_status s ON c.customer_status_code = s.customer_status_code;
 
-CREATE OR REPLACE VIEW driving_school.view_staff AS
+CREATE OR REPLACE VIEW view_staff AS
 SELECT
 	st.staff_id,
 	st.nickname,
@@ -57,7 +57,7 @@ FROM driving_school.staff st
 LEFT JOIN driving_school.addresses a ON st.staff_address_id = a.address_id
 LEFT JOIN driving_school.customer_status s ON st.customer_status_code = s.customer_status_code;
 
-CREATE OR REPLACE VIEW driving_school.view_lessons AS
+CREATE OR REPLACE VIEW view_lessons AS
 SELECT
 	l.lesson_id,
 	l.customer_id,
@@ -81,7 +81,7 @@ LEFT JOIN driving_school.customers c ON l.customer_id = c.customer_id
 LEFT JOIN driving_school.staff st ON l.staff_id = st.staff_id
 LEFT JOIN driving_school.vehicles v ON l.vehicle_id = v.vehicle_id;
 
-CREATE OR REPLACE VIEW driving_school.view_customer_payments AS
+CREATE OR REPLACE VIEW view_customer_payments AS
 SELECT
 	cp.customer_id,
 	c.first_name,
@@ -95,7 +95,7 @@ FROM driving_school.customer_payments cp
 LEFT JOIN driving_school.payment_methods pm ON cp.payment_method_code = pm.payment_method_code
 LEFT JOIN driving_school.customers c ON cp.customer_id = c.customer_id;
 
-CREATE OR REPLACE VIEW driving_school.view_user_roles AS
+CREATE OR REPLACE VIEW view_user_roles AS
 SELECT
 	u.user_id,
 	u.email,
@@ -116,7 +116,7 @@ LEFT JOIN driving_school.app_roles r ON ur.role_code = r.role_code
 LEFT JOIN driving_school.staff st ON u.staff_id = st.staff_id
 LEFT JOIN driving_school.customers c ON u.customer_id = c.customer_id;
 
-CREATE OR REPLACE VIEW driving_school.view_customer_financials AS
+CREATE OR REPLACE VIEW view_customer_financials AS
 SELECT
 	c.customer_id,
 	c.first_name,
@@ -131,7 +131,7 @@ LEFT JOIN (
 	GROUP BY customer_id
 ) p ON c.customer_id = p.customer_id;
 
-CREATE OR REPLACE VIEW driving_school.view_lessons_schedule AS
+CREATE OR REPLACE VIEW view_lessons_schedule AS
 SELECT
 	l.lesson_id,
 	(l.lesson_date + l.lesson_time) AS lesson_datetime,

@@ -299,13 +299,13 @@ GRANT EXECUTE ON FUNCTION fn_set_password(INT,TEXT)   TO authenticated;
 
 -- For testing/demo purposes, we also grant read access to the active instructors and customer balance views, which include personally identifiable information. 
 -- In production, you would likely restrict these to staff-only roles or create sanitized versions.
-GRANT SELECT ON driving_school.vw_customer_balance      TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_active_instructors      TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_customer_full_address     TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_instructor_workload    TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_lesson_details    TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_today_lessons   TO anon, authenticated;
-GRANT SELECT ON driving_school.vw_upcoming_lessons   TO anon, authenticated;
+GRANT SELECT ON vw_customer_balance      TO anon, authenticated;
+GRANT SELECT ON vw_active_instructors      TO anon, authenticated;
+GRANT SELECT ON vw_customer_full_address     TO anon, authenticated;
+GRANT SELECT ON vw_instructor_workload    TO anon, authenticated;
+GRANT SELECT ON vw_lesson_details    TO anon, authenticated;
+GRANT SELECT ON vw_today_lessons   TO anon, authenticated;
+GRANT SELECT ON vw_upcoming_lessons   TO anon, authenticated;
 
 
 -- SEED: three demo accounts (CHANGE THESE PASSWORDS). 
