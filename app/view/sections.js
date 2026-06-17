@@ -33,7 +33,7 @@ export const accessDeniedView = () => `
 /* ---------------- Customers ---------------- */
 export function customersView(rows) {
   return `<div class="card"><div class="panel-head"><h2>All customers (${rows.length})</h2>
-    <span class="muted" style="font-size:12px">Read via <span class="mono">vw_customer_full_address</span></span></div>
+    <span class="muted" style="font-size:12px">Read via <span class="mono">vw_customer_full_address</span> · written via <span class="mono">fn_update_customer | fn_delete_customer</span></span></div>
     <div style="overflow:auto"><table><thead><tr>
       <th>Name</th><th>Age</th><th>Status</th><th>Contact</th><th>Address</th><th class="num">Balance</th><th></th>
     </tr></thead><tbody>${rows.map(c => `<tr>
@@ -50,10 +50,27 @@ export function customersView(rows) {
       </div></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
+/* ---------------- Staff ---------------- */
+export function staffView(staffRows) {
+  return `<div class="card"><div class="panel-head"><h2>Instructor management (${staffRows.length})</h2>
+      <span class="muted" style="font-size:12px">driving_school.staff Read via <span class="mono">fn_resolve_address</span> · written via <span class="mono">fn_update_staff</span></span></div>
+      <div style="overflow:auto"><table><thead><tr><th>Instructor</th><th>Status</th><th class="num">Joined</th><th class="num">Left</th><th>Notes</th><th></th></tr></thead>
+      <tbody>${staffRows.map(s => `<tr>
+          <td class="name">${esc(staffDisplayName(s))}</td>
+          <td>${custStatusPill(s.customer_status_code)}</td>
+          <td class="num muted mono">${esc((s.date_joined_staff || '').slice(0, 10) || '—')}</td>
+          <td class="num muted mono">${esc((s.date_left_staff || '').slice(0, 10) || '—')}</td>
+          <td class="muted" style="font-size:12.5px">${esc(s.other_staff_details || '')}</td>
+          <td><div class="row-actions">
+            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+          </div></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
 /* ---------------- Lessons ---------------- */
 export function lessonsView(rows) {
   return `<div class="card"><div class="panel-head"><h2>All lessons (${rows.length})</h2>
-    <span class="muted" style="font-size:12px">Read via <span class="mono">vw_lesson_details</span> · written via <span class="mono">sp_book_lesson</span></span></div>
+    <span class="muted" style="font-size:12px">Read via <span class="mono">vw_lesson_details</span> · written via <span class="mono">fn_update_lesson | fn_delete_lesson</span></span></div>
     <div style="overflow:auto"><table><thead><tr>
       <th>Date</th><th>Time</th><th>Customer</th><th>Instructor</th><th>Vehicle</th><th class="num">Price</th><th>Status</th><th></th>
     </tr></thead><tbody>${rows.map(l => `<tr>
@@ -79,7 +96,6 @@ export function scheduleView({ today, upcoming, instr, work, staffRows, canManag
     : `<div class="empty"><b>${emptyMsg}</b>Book one from the Lessons tab to see it here.</div>`}</div>`;
 
   // Staff card is rendered in its own view: use staffView(staffRows) from the staff controller.
-
   return `<div class="grid g2" style="align-items:start">
     ${lessonList(today, 'Nothing scheduled today', { title: `Today — ${todayISO()}`, code: 'vw_today_lessons' })}
     ${lessonList(upcoming, 'No upcoming lessons', { title: 'Upcoming lessons', code: 'vw_upcoming_lessons' })}
@@ -93,21 +109,6 @@ export function scheduleView({ today, upcoming, instr, work, staffRows, canManag
   </div>`;
 }
 
-// Standalone staff management view used by the staff controller.
-export function staffView(staffRows) {
-  return `<div class="card"><div class="panel-head"><h2>Instructor management (${staffRows.length})</h2><span class="muted mono" style="font-size:11.5px">driving_school.staff</span></div>
-      <div style="overflow:auto"><table><thead><tr><th>Instructor</th><th>Status</th><th class="num">Joined</th><th class="num">Left</th><th>Notes</th><th></th></tr></thead>
-      <tbody>${staffRows.map(s => `<tr>
-          <td class="name">${esc(staffDisplayName(s))}</td>
-          <td>${custStatusPill(s.customer_status_code)}</td>
-          <td class="num muted mono">${esc((s.date_joined_staff || '').slice(0, 10) || '—')}</td>
-          <td class="num muted mono">${esc((s.date_left_staff || '').slice(0, 10) || '—')}</td>
-          <td class="muted" style="font-size:12.5px">${esc(s.other_staff_details || '')}</td>
-          <td><div class="row-actions">
-            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
-            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
-          </div></td></tr>`).join('')}</tbody></table></div></div>`;
-}
 
 /* ---------------- Reports ---------------- */
 export function reportsView({ work, bal, monthly, vehicle }) {
