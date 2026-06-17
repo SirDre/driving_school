@@ -33,15 +33,23 @@ export function customerFormHTML(c, addrA, isEdit) {
 }
 
 /* ---------------- Payment form ---------------- */
-export function paymentFormHTML(c) {
+export function paymentFormHTML(c, lessons = []) {
+  const lessonOptions = lessons.length
+    ? lessons.map((l, index) => `<option value="${l.lesson_id}"${index === 0 ? ' selected' : ''}>${esc(l.date)} ${esc(l.time)} — ${esc(l.status)} — ${fmt$(l.price)}</option>`).join('')
+    : '<option value="">No lessons on file</option>';
+
   return `<div class="mhead"><h3>Record payment</h3><p>For ${esc(c.customer_name)} — current balance ${fmt$(c.balance)}.</p></div>
     <div class="mbody">
       <div class="ftwo">
         <div class="field"><label>Amount (CAD)</label><input id="p_amt" type="number" step="0.01" min="0.01" placeholder="0.00"></div>
         <div class="field"><label>Method</label><select id="p_method">${Object.entries(state.REF.methods).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</select></div>
       </div>
+      <div class="ftwo">
+        <div class="field"><label>Lesson to correct (optional)</label><select id="p_lesson">${lessonOptions}</select></div>
+        <div class="field"><label>Corrected lesson price (CAD)</label><input id="p_lesson_price" type="number" step="0.01" min="0" placeholder="Leave blank to keep current price"></div>
+      </div>
       <div class="field"><label>Note (optional)</label><input id="p_note" placeholder="e.g. Lesson 3 paid"></div>
-      <div class="hint" style="font-size:12px;color:var(--ink-faint)">The balance is reduced automatically by the payment trigger.</div>
+      <div class="hint" style="font-size:12px;color:var(--ink-faint)">If you correct a lesson price here, the lessons table and customer balance will both update before the payment is recorded.</div>
     </div>
     <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn go" id="save">Record payment</button></div>`;
 }

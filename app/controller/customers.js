@@ -100,8 +100,34 @@ async function openCustomerForm(c) {
 }
 
 // Shows the payment recording form for a customer.
-function openPaymentForm(c) {
-    openModal(paymentFormHTML(c));
+async function openPaymentForm(c) {
+    let lessons = [];
+
+    try {
+        lessons = (await state.db.listLessons()).filter(l => l.customer_id == c.customer_id);
+    } catch (e) {
+        toast(e.message, true);
+        return;
+    }
+
+    openModal(paymentFormHTML(c, lessons));
+
+    const lessonMap = new Map(lessons.map(l => [String(l.lesson_id), l]));
+    const lessonSelect = $('p_lesson');
+    const lessonPrice = $('p_lesson_price');
+    const syncPriceFromLesson = () => {
+        const currentLesson = lessonMap.get(lessonSelect.value);
+        lessonPrice.value = currentLesson ? Number(currentLesson.price).toFixed(2) : '';
+    };
+
+    if (lessons.length) {
+        syncPriceFromLesson();
+        lessonSelect.onchange = syncPriceFromLesson;
+    } else {
+        lessonSelect.disabled = true;
+        lessonPrice.disabled = true;
+        lessonPrice.value = '';
+    }
 
     // Set up the cancel button to close the modal.
     $('cancel').onclick = closeModal;
@@ -109,13 +135,27 @@ function openPaymentForm(c) {
     // Set up the save button to validate input, save through the model, and refresh the view.
     $('save').onclick = async () => {
         const amt = parseFloat($('p_amt').value);
+        const selectedLessonId = lessonSelect.disabled ? null : lessonSelect.value;
+        const correctedPrice = $('p_lesson_price').value === '' ? null : parseFloat($('p_lesson_price').value);
+        const selectedLesson = selectedLessonId ? lessonMap.get(String(selectedLessonId)) : null;
+
         // Basic validation: amount must be a number greater than zero.
         if (!(amt > 0)) {
             toast('Enter an amount greater than zero.', true);
             return;
         }
+
+        if (selectedLessonId && $('p_lesson_price').value !== '' && !(correctedPrice >= 0)) {
+            toast('Enter a valid corrected lesson price, or leave it blank.', true);
+            return;
+        }
+
         // Save the payment through the model, then refresh the view. Error handling will show a toast if something goes wrong.
         try {
+            if (selectedLesson && correctedPrice !== null && correctedPrice !== Number(selectedLesson.price)) {
+                const lesson = await state.db.getLesson(selectedLessonId);
+                await state.db.updateLesson(lesson.lesson_id, { ...lesson, price: correctedPrice });
+            }
             await state.db.recordPayment({ cust: c.customer_id, method: $('p_method').value, amt, notes: $('p_note').value.trim() });
             toast('Payment recorded.'); closeModal(); refresh();
         } catch (e) {

@@ -252,7 +252,19 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = driving_school, public
 AS $$
+DECLARE
+    v_old_customer_id INT;
+    v_old_price DECIMAL(10,2);
 BEGIN
+    SELECT customer_id, price
+      INTO v_old_customer_id, v_old_price
+      FROM Lessons
+     WHERE lesson_id = p_lesson_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Lesson % does not exist', p_lesson_id;
+    END IF;
+
     UPDATE Lessons
        SET customer_id = p_customer_id,
            staff_id = p_staff_id,
@@ -264,8 +276,18 @@ BEGIN
            lesson_status_code = COALESCE(p_status_code, lesson_status_code)
      WHERE lesson_id = p_lesson_id;
 
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Lesson % does not exist', p_lesson_id;
+        IF v_old_customer_id = p_customer_id THEN
+                UPDATE Customers
+                     SET amount_outstanding = GREATEST(0, amount_outstanding + p_price - v_old_price)
+                 WHERE customer_id = p_customer_id;
+        ELSE
+                UPDATE Customers
+                     SET amount_outstanding = GREATEST(0, amount_outstanding - v_old_price)
+                 WHERE customer_id = v_old_customer_id;
+
+                UPDATE Customers
+                     SET amount_outstanding = amount_outstanding + p_price
+                 WHERE customer_id = p_customer_id;
     END IF;
 END;
 $$;

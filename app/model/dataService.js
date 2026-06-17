@@ -83,7 +83,7 @@ export function makeLiveDB(sb) {
       const { data, error } = await s.from('vw_lesson_details').select('*').order('lesson_date', { ascending: false });
       
       return ok(data, error).map(r => ({
-        lesson_id: r.lesson_id, date: r.lesson_date, time: (r.lesson_time || '').slice(0, 5),
+        lesson_id: r.lesson_id, customer_id: r.customer_id, date: r.lesson_date, time: (r.lesson_time || '').slice(0, 5),
         price: r.price, status: r.status, customer: r.customer_name,
         instructor: r.instructor_name || '—', vehicle: r.vehicle_details || '—',
         notes: r.other_lesson_details, status_code: null, cust: null, staff: null, veh: null,
