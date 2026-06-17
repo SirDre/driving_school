@@ -25,54 +25,110 @@ export async function mountStaff() {
   v.querySelectorAll('[data-staff-del]').forEach(b => b.onclick = () => confirmDeleteStaff(staffRows.find(r => r.staff_id == b.dataset.staffDel)));
 }
 
+
 async function openStaffForm(row) {
-  const isEdit = !!row;
-  let allAddr = [];
-  let cur = null;
+    const isEdit = !!row;
+    let allAddr = [];
+    let cur = null;
 
-  try { allAddr = await state.db.listAddresses(); } catch (e) { toast('Could not load the addresses: ' + e.message, true); return; }
+    // Fetch all addresses for the address picker (optional, but nice to have).
+    try {
+        allAddr = await state.db.listAddresses();
+    } catch (e) {
+        toast('Could not load the addresses: ' + e.message, true);
+        return;
+    }
 
-  if (isEdit && row?.staff_address_id) cur = await state.db.getAddress(row.staff_address_id);
+    // If editing and the instructor has an address, fetch it to pre-fill the form.
+    if (isEdit && row?.staff_address_id) {
+        cur = await state.db.getAddress(row.staff_address_id);
 
-  openModal(staffFormHTML(row, cur || {}, isEdit));
-  wireAddressPicker('s', allAddr);
+    }
 
-  $('cancel').onclick = closeModal;
+    // Render the form modal with the staff data (if editing) and the list of all addresses for the picker.
+    openModal(staffFormHTML(row, cur || {}, isEdit));
+    wireAddressPicker('s', allAddr);
 
-  $('save').onclick = async () => {
-    const payload = {
-      staffAddressId: null, status: $('s_status').value, nickname: $('s_nick').value.trim(),
-      first: $('s_first').value.trim(), middle: $('s_middle').value.trim(), last: $('s_last').value.trim(),
-      dob: $('s_dob').value || null, joined: $('s_joined').value, left: $('s_left').value || null, notes: $('s_notes').value.trim(),
+    // Cancel just closes the modal.
+    $('cancel').onclick = closeModal;
+
+    // Save validates the form, then either adds or updates the instructor through the model.
+    $('save').onclick = async () => {
+
+        // Gather form data into a payload object. Basic validation for required fields.
+        const payload = {
+            staffAddressId: null, status: $('s_status').value, nickname: $('s_nick').value.trim(),
+            first: $('s_first').value.trim(), middle: $('s_middle').value.trim(), last: $('s_last').value.trim(),
+            dob: $('s_dob').value || null, joined: $('s_joined').value, left: $('s_left').value || null, notes: $('s_notes').value.trim(),
+        };
+
+        // Basic validation: first name, last name and joined date are required.
+        if (!payload.first || !payload.last || !payload.joined) {
+            toast('First name, last name and joined date are required.', true);
+            return;
+        }
+
+
+        // If any address fields are filled, validate that the required address fields are present, then resolve or create the address and set staffAddressId.
+        try {
+
+            const addr = readAddressFields('s');
+
+            // If any address input is present 
+            if (addressHasInput(addr)) {
+
+                if (!addr.line_1_number_building || !addr.city || !addr.zip_postcode) {
+                    toast('For an address, building (line 1), city and postcode are required.', true);
+                    return;
+                }
+
+                // Try to resolve the address to an ID. 
+                try {
+                    payload.staffAddressId = await state.db.resolveAddress(addr);
+                } catch (e) {
+                    toast('Could not save the address: ' + e.message, true);
+                    return;
+                }
+            }
+
+            // Save the instructor. If editing, update the existing record; if adding, create a new one.
+            if (isEdit) {
+                await state.db.updateStaff(row.staff_id, payload);
+                toast('Instructor saved.');
+            } else {
+                await state.db.addStaff(payload);
+                toast('Instructor added.');
+            }
+
+            closeModal();
+            state.REF = null;
+            refresh();
+
+        } catch (e) {
+            toast(e.message, true); // Show any errors
+        }
     };
 
-    if (!payload.first || !payload.last || !payload.joined) { toast('First name, last name and joined date are required.', true); return; }
 
-    try {
-      const addr = readAddressFields('s');
-      if (addressHasInput(addr)) {
-        if (!addr.line_1_number_building || !addr.city || !addr.zip_postcode) { toast('For an address, building (line 1), city and postcode are required.', true); return; }
-        try { payload.staffAddressId = await state.db.resolveAddress(addr); } catch (e) { toast('Could not save the address: ' + e.message, true); return; }
-      }
-
-      if (isEdit) { await state.db.updateStaff(row.staff_id, payload); toast('Instructor saved.'); }
-      else { await state.db.addStaff(payload); toast('Instructor added.'); }
-
-      closeModal(); state.REF = null; refresh();
-    } catch (e) { toast(e.message, true); }
-  };
 }
 
+// Shows a confirmation modal for deleting an instructor. 
 function confirmDeleteStaff(row) {
-  openModal(deleteStaffHTML(row));
-  $('cancel').onclick = closeModal;
-  $('del').onclick = async () => {
-    try { await state.db.deleteStaff(row.staff_id); toast('Instructor deleted.'); closeModal(); state.REF = null; refresh(); }
-    catch (e) { toast(e.message, true); }
-  };
+    openModal(deleteStaffHTML(row));
+
+    //  Cancel just closes the modal
+    $('cancel').onclick = closeModal;
+
+    // Delete calls the model to delete the instructor, then shows a toast and refreshes the view.
+    $('del').onclick = async () => {
+        try {
+            await state.db.deleteStaff(row.staff_id);
+            toast('Instructor deleted.');
+            closeModal();
+            state.REF = null;
+            refresh();
+        } catch (e) {
+            toast(e.message, true);
+        }
+    };
 }
-/* 
-   controller/staff.js — staff CRUD.
-   Fetches via the model, renders via the view, wires the row actions and
-   the form, and writes back through the model.
- */
