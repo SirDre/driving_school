@@ -104,7 +104,7 @@ export function lessonFormHTML(l, isEdit = false) {
         <div class="field"><label>Price (CAD)</label><input id="b_price" type="number" step="0.01" min="0" value="${esc(l?.price ?? '70.00')}"></div>
         <div class="field"><label>Status</label><select id="b_status">${statusOpts}</select></div>
       </div>
-      <div class="field"><label>Notes</label><input id="b_notes" value="${esc(l?.notes || '')}" placeholder="e.g. Highway intro"></div>
+      <div class="field"><label>Notes</label><textarea id="b_notes" rows="4" placeholder="e.g. Highway intro">${esc(l?.notes || '')}</textarea></div>
     </div>
     <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">${isEdit ? 'Save lesson' : 'Book lesson'}</button></div>`;
 }

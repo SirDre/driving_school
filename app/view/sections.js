@@ -78,19 +78,7 @@ export function scheduleView({ today, upcoming, instr, work, staffRows, canManag
     <tbody>${arr.map(l => `<tr><td class="mono">${esc(l.date)}</td><td class="mono muted">${esc(l.time)}</td><td class="name">${esc(l.customer)}</td><td class="muted">${esc(l.instructor)}</td><td>${lessonPill(l.status)}</td></tr>`).join('')}</tbody></table></div>`
     : `<div class="empty"><b>${emptyMsg}</b>Book one from the Lessons tab to see it here.</div>`}</div>`;
 
-  const staffCard = canManage ? `
-    <div class="card"><div class="panel-head"><h2>Instructor management</h2><span class="muted mono" style="font-size:11.5px">driving_school.staff</span></div>
-      <div style="overflow:auto"><table><thead><tr><th>Instructor</th><th>Status</th><th class="num">Joined</th><th class="num">Left</th><th>Notes</th><th></th></tr></thead>
-      <tbody>${staffRows.map(s => `<tr>
-          <td class="name">${esc(staffDisplayName(s))}</td>
-          <td>${custStatusPill(s.customer_status_code)}</td>
-          <td class="num muted mono">${esc((s.date_joined_staff || '').slice(0, 10) || '—')}</td>
-          <td class="num muted mono">${esc((s.date_left_staff || '').slice(0, 10) || '—')}</td>
-          <td class="muted" style="font-size:12.5px">${esc(s.other_staff_details || '')}</td>
-          <td><div class="row-actions">
-            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
-            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
-          </div></td></tr>`).join('')}</tbody></table></div></div>` : '';
+  // Staff card is rendered in its own view: use staffView(staffRows) from the staff controller.
 
   return `<div class="grid g2" style="align-items:start">
     ${lessonList(today, 'Nothing scheduled today', { title: `Today — ${todayISO()}`, code: 'vw_today_lessons' })}
@@ -101,8 +89,24 @@ export function scheduleView({ today, upcoming, instr, work, staffRows, canManag
     <div class="card"><div class="panel-head"><h2>Instructor workload</h2><span class="muted mono" style="font-size:11.5px">vw_instructor_workload</span></div>
       <table><thead><tr><th>Instructor</th><th class="num">Total</th><th class="num">Done</th><th class="num">Canc.</th><th class="num">Revenue</th></tr></thead>
       <tbody>${work.map(w => `<tr><td class="name">${esc(w.name)}</td><td class="num">${w.total}</td><td class="num">${w.completed}</td><td class="num muted">${w.cancelled}</td><td class="num">${fmt$(w.revenue)}</td></tr>`).join('')}</tbody></table></div>
-    ${staffCard}
+    
   </div>`;
+}
+
+// Standalone staff management view used by the staff controller.
+export function staffView(staffRows) {
+  return `<div class="card"><div class="panel-head"><h2>Instructor management (${staffRows.length})</h2><span class="muted mono" style="font-size:11.5px">driving_school.staff</span></div>
+      <div style="overflow:auto"><table><thead><tr><th>Instructor</th><th>Status</th><th class="num">Joined</th><th class="num">Left</th><th>Notes</th><th></th></tr></thead>
+      <tbody>${staffRows.map(s => `<tr>
+          <td class="name">${esc(staffDisplayName(s))}</td>
+          <td>${custStatusPill(s.customer_status_code)}</td>
+          <td class="num muted mono">${esc((s.date_joined_staff || '').slice(0, 10) || '—')}</td>
+          <td class="num muted mono">${esc((s.date_left_staff || '').slice(0, 10) || '—')}</td>
+          <td class="muted" style="font-size:12.5px">${esc(s.other_staff_details || '')}</td>
+          <td><div class="row-actions">
+            <button class="iconbtn" title="Edit instructor" data-staff-edit="${s.staff_id}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            <button class="iconbtn del" title="Delete instructor" data-staff-del="${s.staff_id}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+          </div></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 /* ---------------- Reports ---------------- */

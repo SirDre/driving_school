@@ -19,6 +19,8 @@ export const state = {
 export const SECTIONS = {
   customers: { eyebrow: 'Operations', title: 'Customers',
     sub: 'Learner-driver records. Add, edit and remove customers; balances are kept by the database triggers.' },
+  staff:     { eyebrow: 'Operations', title: 'Instructors',
+    sub: 'Add, edit and remove instructors. Manage addresses and employment dates.' },    
   lessons:   { eyebrow: 'Operations', title: 'Lessons',
     sub: 'Book lessons (validated against double-booking), record payments and cancel under the 24-hour rule.' },
   schedule:  { eyebrow: 'Views', title: 'Schedule & staff',

@@ -14,10 +14,11 @@ import { mountCustomers } from './customers.js';
 import { mountLessons } from './lessons.js';
 import { mountSchedule } from './schedule.js';
 import { mountReports } from './reports.js';
+import { mountStaff } from './staff.js';
 import { openSignInModal, openRegisterModal } from './auth.js';
 
 // Map each section id to the controller that renders it.
-const mounts = { customers: mountCustomers, lessons: mountLessons, schedule: mountSchedule, reports: mountReports };
+const mounts = { customers: mountCustomers, lessons: mountLessons, schedule: mountSchedule, reports: mountReports, staff: mountStaff };
 
 // Set the header content in the app chrome.
 function setHeader(eyebrow, title, sub) {

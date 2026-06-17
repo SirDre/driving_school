@@ -5,11 +5,8 @@
  */
 
 import { state } from '../core/state.js';
-import { $, toast, openModal, closeModal } from '../core/dom.js';
+import { $, toast } from '../core/dom.js';
 import { scheduleView } from '../view/sections.js';
-import { staffFormHTML, deleteStaffHTML } from '../view/forms.js';
-import { wireAddressPicker, readAddressFields, addressHasInput } from '../view/components.js';
-import { canManageOperations } from '../model/session.js';
 import { refresh } from './router.js';
 
 export async function mountSchedule() {
@@ -20,25 +17,11 @@ export async function mountSchedule() {
     const instr = await state.db.listInstructors();
     const work = await state.db.listWorkload();
     const staffRows = await state.db.listStaff();
-    const canManage = canManageOperations();
+    const canManage = false; // staff CRUD moved to controller/staff.js
     const v = $('view');
 
-    // If the user has permissions, show the "Add instructor" button and set up its click handler. Otherwise, ensure no action buttons are shown.
-    if (canManage) {
-        $('headAction').innerHTML = `<button class="btn" id="newStaff">+ Add instructor</button>`;
-        $('newStaff').onclick = () => openStaffForm();
-    } else {
-        $('headAction').innerHTML = '';
-    }
-
-    // Render the schedule view with all the fetched data and the canManage flag to conditionally show management features.
+    // Render the schedule view (staff management is now a separate section).
     v.innerHTML = scheduleView({ today, upcoming, instr, work, staffRows, canManage });
-
-    // Wire the action buttons after the table markup has been rendered.
-    if (canManage) {
-        v.querySelectorAll('[data-staff-edit]').forEach(b => b.onclick = () => openStaffForm(staffRows.find(r => r.staff_id == b.dataset.staffEdit)));
-        v.querySelectorAll('[data-staff-del]').forEach(b => b.onclick = () => confirmDeleteStaff(staffRows.find(r => r.staff_id == b.dataset.staffDel)));
-    }
 
 
 }
