@@ -25,9 +25,9 @@ GRANT USAGE ON SCHEMA driving_school TO anon, authenticated, service_role;
 GRANT SELECT ON ALL TABLES    IN SCHEMA driving_school TO anon, authenticated;
 
 -- Write access on the two core tables for the front-desk CRUD flows.
-GRANT INSERT, UPDATE, DELETE ON driving_school.Customers TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON driving_school.Lessons   TO authenticated;
-GRANT INSERT                 ON driving_school.Customer_Payments TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON customers TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON lessons   TO authenticated;
+GRANT INSERT                 ON customer_payments TO authenticated;
 
 -- IDENTITY sequences need USAGE so inserts can generate keys.
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA driving_school TO authenticated;
