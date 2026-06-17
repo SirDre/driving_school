@@ -101,67 +101,81 @@ async function openCustomerForm(c) {
 
 // Shows the payment recording form for a customer.
 async function openPaymentForm(c) {
-    let lessons = [];
+    let customer = c;
+    let payments = [];
+    let editing = null;
 
     try {
-        lessons = (await state.db.listLessons()).filter(l => l.customer_id == c.customer_id);
+        payments = await state.db.listCustomerPayments(customer.customer_id);
     } catch (e) {
         toast(e.message, true);
-        return;
     }
 
-    openModal(paymentFormHTML(c, lessons));
+    const render = () => {
+        openModal(paymentFormHTML(customer, payments, editing));
 
-    const lessonMap = new Map(lessons.map(l => [String(l.lesson_id), l]));
-    const lessonSelect = $('p_lesson');
-    const lessonPrice = $('p_lesson_price');
-    const syncPriceFromLesson = () => {
-        const currentLesson = lessonMap.get(lessonSelect.value);
-        lessonPrice.value = currentLesson ? Number(currentLesson.price).toFixed(2) : '';
-    };
+        // Set up the cancel button to close the modal.
+        $('cancel').onclick = closeModal;
 
-    if (lessons.length) {
-        syncPriceFromLesson();
-        lessonSelect.onchange = syncPriceFromLesson;
-    } else {
-        lessonSelect.disabled = true;
-        lessonPrice.disabled = true;
-        lessonPrice.value = '';
-    }
-
-    // Set up the cancel button to close the modal.
-    $('cancel').onclick = closeModal;
-
-    // Set up the save button to validate input, save through the model, and refresh the view.
-    $('save').onclick = async () => {
-        const amt = parseFloat($('p_amt').value);
-        const selectedLessonId = lessonSelect.disabled ? null : lessonSelect.value;
-        const correctedPrice = $('p_lesson_price').value === '' ? null : parseFloat($('p_lesson_price').value);
-        const selectedLesson = selectedLessonId ? lessonMap.get(String(selectedLessonId)) : null;
-
-        // Basic validation: amount must be a number greater than zero.
-        if (!(amt > 0)) {
-            toast('Enter an amount greater than zero.', true);
-            return;
+        const clearEdit = $('clearEdit');
+        if (clearEdit) {
+            clearEdit.onclick = () => {
+                editing = null;
+                render();
+            };
         }
 
-        if (selectedLessonId && $('p_lesson_price').value !== '' && !(correctedPrice >= 0)) {
-            toast('Enter a valid corrected lesson price, or leave it blank.', true);
-            return;
-        }
+        // Load a payment row into the form for correction.
+        $('modal').querySelectorAll('[data-pay-edit]').forEach(b => b.onclick = () => {
+            editing = payments.find(p => p.datetime_payment === b.dataset.payEdit) || null;
+            render();
+        });
 
-        // Save the payment through the model, then refresh the view. Error handling will show a toast if something goes wrong.
-        try {
-            if (selectedLesson && correctedPrice !== null && correctedPrice !== Number(selectedLesson.price)) {
-                const lesson = await state.db.getLesson(selectedLessonId);
-                await state.db.updateLesson(lesson.lesson_id, { ...lesson, price: correctedPrice });
+        // Set up the save button to validate input, save through the model, and refresh the view.
+        $('save').onclick = async () => {
+            const amt = parseFloat($('p_amt').value);
+            // Basic validation: amount must be a number greater than zero.
+            if (!(amt > 0)) {
+                toast('Enter an amount greater than zero.', true);
+                return;
             }
-            await state.db.recordPayment({ cust: c.customer_id, method: $('p_method').value, amt, notes: $('p_note').value.trim() });
-            toast('Payment recorded.'); closeModal(); refresh();
-        } catch (e) {
-            toast(e.message, true);
-        }
+
+            const notes = $('p_note').value.trim();
+
+            try {
+                if (editing) {
+                    const nextDatetime = $('p_datetime').value;
+                    if (!nextDatetime) {
+                        toast('Choose a payment date and time.', true);
+                        return;
+                    }
+                    await state.db.updatePayment({
+                        cust: customer.customer_id,
+                        originalDatetime: editing.datetime_payment,
+                        datetime: nextDatetime,
+                        method: $('p_method').value,
+                        amt,
+                        notes,
+                    });
+                    toast('Payment updated.');
+                } else {
+                    await state.db.recordPayment({ cust: customer.customer_id, method: $('p_method').value, amt, notes });
+                    toast('Payment recorded.');
+                }
+
+                const rows = await state.db.listCustomers();
+                customer = rows.find(row => row.customer_id == customer.customer_id) || customer;
+                payments = await state.db.listCustomerPayments(customer.customer_id);
+                editing = null;
+                render();
+                refresh();
+            } catch (e) {
+                toast(e.message, true);
+            }
+        };
     };
+
+    render();
 }
 
 // Shows a confirmation modal for deleting a customer. Requires typing the customer's name to confirm.

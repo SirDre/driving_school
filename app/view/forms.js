@@ -11,6 +11,8 @@ import { statusOptions, addressSectionHTML } from './components.js';
 const staffDisplayName = row =>
   [row?.nickname, [row?.first_name, row?.last_name].filter(Boolean).join(' ')].filter(Boolean)[0] || 'instructor';
 
+const niceTs = v => (v ? new Date(v).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+
 /* ---------------- Customer form ---------------- */
 export function customerFormHTML(c, addrA, isEdit) {
   return `<div class="mhead"><h3>${isEdit ? 'Edit customer' : 'New customer'}</h3>
@@ -33,25 +35,41 @@ export function customerFormHTML(c, addrA, isEdit) {
 }
 
 /* ---------------- Payment form ---------------- */
-export function paymentFormHTML(c, lessons = []) {
-  const lessonOptions = lessons.length
-    ? lessons.map((l, index) => `<option value="${l.lesson_id}"${index === 0 ? ' selected' : ''}>${esc(l.date)} ${esc(l.time)} — ${esc(l.status)} — ${fmt$(l.price)}</option>`).join('')
-    : '<option value="">No lessons on file</option>';
+export function paymentFormHTML(c, payments = [], editing = null) {
+  const methods = Object.entries(state.REF.methods || {});
+  const defaultMethod = editing?.payment_method_code || methods[0]?.[0] || '';
+  const totalPaid = payments.reduce((sum, row) => sum + Number(row.amount_payment || 0), 0);
+  const historyRows = payments.length ? payments.map((row) => {
+    const active = editing && row.customer_id === editing.customer_id && row.datetime_payment === editing.datetime_payment;
+    return `<tr class="${active ? 'active' : ''}">
+      <td class="mono">${esc(niceTs(row.datetime_payment))}</td>
+      <td class="muted">${esc(row.payment_method_description || row.payment_method_code || '—')}</td>
+      <td class="num">${fmt$(row.amount_payment)}</td>
+      <td class="muted">${esc(row.other_payment_details || '—')}</td>
+      <td class="num"><button class="iconbtn" title="Edit payment" data-pay-edit="${esc(row.datetime_payment)}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty" style="padding:8px 0;color:var(--ink-soft)">No payments recorded yet.</div></td></tr>`;
 
-  return `<div class="mhead"><h3>Record payment</h3><p>For ${esc(c.customer_name)} — current balance ${fmt$(c.balance)}.</p></div>
+  return `<div class="mhead"><h3>${editing ? 'Edit payment' : 'Record payment'}</h3><p>For ${esc(c.customer_name)} — current balance ${fmt$(c.balance)} · ${payments.length} payment${payments.length === 1 ? '' : 's'} totaling ${fmt$(totalPaid)}.</p></div>
     <div class="mbody">
+      ${editing ? `<div class="warn" style="margin-bottom:12px">Editing payment from ${esc(niceTs(editing.datetime_payment))}. Save corrections here, then the balance recalculates automatically.</div>` : `<div class="hint" style="font-size:12px;color:var(--ink-faint);margin-bottom:12px">New payments are recorded at the current time. Use the list below to correct an existing payment.</div>`}
       <div class="ftwo">
-        <div class="field"><label>Amount (CAD)</label><input id="p_amt" type="number" step="0.01" min="0.01" placeholder="0.00"></div>
-        <div class="field"><label>Method</label><select id="p_method">${Object.entries(state.REF.methods).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</select></div>
+        <div class="field"><label>Amount (CAD)</label><input id="p_amt" type="number" step="0.01" min="0.01" placeholder="0.00" value="${esc(editing?.amount_payment ?? '')}"></div>
+        <div class="field"><label>Method</label><select id="p_method">${methods.map(([k, v]) => `<option value="${k}"${k === defaultMethod ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
       </div>
-      <div class="ftwo">
-        <div class="field"><label>Lesson to correct (optional)</label><select id="p_lesson">${lessonOptions}</select></div>
-        <div class="field"><label>Corrected lesson price (CAD)</label><input id="p_lesson_price" type="number" step="0.01" min="0" placeholder="Leave blank to keep current price"></div>
+      ${editing ? `<div class="field"><label>Payment date/time</label><input id="p_datetime" type="datetime-local" value="${esc(tsLocal(editing.datetime_payment))}"></div>` : ''}
+      <div class="field"><label>Note (optional)</label><input id="p_note" value="${esc(editing?.other_payment_details || '')}" placeholder="e.g. Lesson 3 paid"></div>
+      <div class="payment-history" style="margin-top:16px">
+        <div class="panel-head" style="padding:0 0 8px 0"><h2 style="font-size:14px;margin:0">Payment history</h2><span class="muted" style="font-size:12px">customer_payments</span></div>
+        <div style="overflow:auto">
+          <table>
+            <thead><tr><th>Date / time</th><th>Method</th><th class="num">Amount</th><th>Note</th><th></th></tr></thead>
+            <tbody>${historyRows}</tbody>
+          </table>
+        </div>
       </div>
-      <div class="field"><label>Note (optional)</label><input id="p_note" placeholder="e.g. Lesson 3 paid"></div>
-      <div class="hint" style="font-size:12px;color:var(--ink-faint)">If you correct a lesson price here, the lessons table and customer balance will both update before the payment is recorded.</div>
     </div>
-    <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button><button class="btn go" id="save">Record payment</button></div>`;
+    <div class="mfoot"><button class="btn ghost" id="cancel">Cancel</button>${editing ? `<button class="btn ghost" id="clearEdit">Back to new payment</button>` : ''}<button class="btn go" id="save">${editing ? 'Save correction' : 'Record payment'}</button></div>`;
 }
 
 /* ---------------- Lesson booking form ---------------- */

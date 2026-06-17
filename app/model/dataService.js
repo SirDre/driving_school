@@ -20,7 +20,8 @@ export function makeDisconnectedDB() {
     addCustomer: blocked, updateCustomer: blocked, deleteCustomer: blocked,
     listStaff: blocked, addStaff: blocked, updateStaff: blocked, deleteStaff: blocked,
     bookLesson: blocked, getLesson: blocked, updateLesson: blocked,
-    recordPayment: blocked, cancelLesson: blocked, deleteLesson: blocked,
+    recordPayment: blocked, listCustomerPayments: blocked, updatePayment: blocked,
+    cancelLesson: blocked, deleteLesson: blocked,
   };
 }
 
@@ -83,7 +84,7 @@ export function makeLiveDB(sb) {
       const { data, error } = await s.from('vw_lesson_details').select('*').order('lesson_date', { ascending: false });
       
       return ok(data, error).map(r => ({
-        lesson_id: r.lesson_id, customer_id: r.customer_id, date: r.lesson_date, time: (r.lesson_time || '').slice(0, 5),
+        lesson_id: r.lesson_id, date: r.lesson_date, time: (r.lesson_time || '').slice(0, 5),
         price: r.price, status: r.status, customer: r.customer_name,
         instructor: r.instructor_name || '—', vehicle: r.vehicle_details || '—',
         notes: r.other_lesson_details, status_code: null, cust: null, staff: null, veh: null,
@@ -227,6 +228,32 @@ export function makeLiveDB(sb) {
     async recordPayment(p) {
       const { error } = await s.rpc('fn_record_payment', {
         p_customer_id: +p.cust, p_method: p.method, p_amount: +p.amt, p_details: p.notes || null,
+      });
+      ok(null, error); return true;
+    },
+    async listCustomerPayments(customerId) {
+      const { data, error } = await s.from('view_customer_payments')
+        .select('*')
+        .eq('customer_id', +customerId)
+        .order('datetime_payment', { ascending: false });
+      return ok(data, error).map(r => ({
+        customer_id: r.customer_id,
+        customer_name: `${r.first_name || ''} ${r.last_name || ''}`.trim(),
+        datetime_payment: r.datetime_payment,
+        payment_method_code: r.payment_method_code,
+        payment_method_description: r.payment_method_description,
+        amount_payment: r.amount_payment,
+        other_payment_details: r.other_payment_details || '',
+      }));
+    },
+    async updatePayment(p) {
+      const { error } = await s.rpc('fn_update_payment', {
+        p_customer_id: +p.cust,
+        p_original_datetime: p.originalDatetime,
+        p_datetime: p.datetime,
+        p_method: p.method,
+        p_amount: +p.amt,
+        p_details: p.notes || null,
       });
       ok(null, error); return true;
     },

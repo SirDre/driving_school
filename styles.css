@@ -582,7 +582,7 @@ th.num {
     background: #fff;
     border-radius: 12px;
     width: 100%;
-    max-width: 520px;
+    max-width: 920px;
     box-shadow: 0 24px 60px rgba(10, 12, 18, .3);
     overflow: hidden;
     max-height: 90vh;
@@ -617,6 +617,18 @@ th.num {
     gap: 9px;
     justify-content: flex-end;
     border-top: 1px solid var(--line-soft)
+}
+
+.payment-history table {
+    font-size: 12.5px
+}
+
+.payment-history thead th {
+    white-space: nowrap
+}
+
+.payment-history tr.active {
+    background: #f5f8ff
 }
 
 .field {

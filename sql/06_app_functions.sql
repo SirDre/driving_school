@@ -77,6 +77,55 @@ BEGIN
 END;
 $$;
 
+-- Update an existing payment and keep customer balances in sync.
+CREATE OR REPLACE FUNCTION fn_update_payment (
+    p_customer_id        INT,
+    p_original_datetime   TIMESTAMP,
+    p_datetime            TIMESTAMP,
+    p_method              VARCHAR(10),
+    p_amount              DECIMAL(10,2),
+    p_details             TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = driving_school, public
+AS $$
+DECLARE
+    v_old_amount DECIMAL(10,2);
+BEGIN
+    IF p_amount <= 0 THEN
+        RAISE EXCEPTION 'Payment amount must be positive';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM Payment_Methods WHERE payment_method_code = p_method) THEN
+        RAISE EXCEPTION 'Payment method % does not exist', p_method;
+    END IF;
+
+    SELECT amount_payment
+      INTO v_old_amount
+      FROM Customer_Payments
+     WHERE customer_id = p_customer_id
+       AND datetime_payment = p_original_datetime
+     FOR UPDATE;
+
+    IF v_old_amount IS NULL THEN
+        RAISE EXCEPTION 'Payment not found';
+    END IF;
+
+    UPDATE Customer_Payments
+       SET datetime_payment = p_datetime,
+           payment_method_code = p_method,
+           amount_payment = p_amount,
+           other_payment_details = p_details
+     WHERE customer_id = p_customer_id
+       AND datetime_payment = p_original_datetime;
+
+    UPDATE Customers
+       SET amount_outstanding = GREATEST(0, amount_outstanding + v_old_amount - p_amount)
+     WHERE customer_id = p_customer_id;
+END;
+$$;
+
 -- Cancel a lesson with the 24-hour free-cancellation rule.
 CREATE OR REPLACE FUNCTION fn_cancel_lesson (
     p_lesson_id INT
@@ -252,19 +301,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = driving_school, public
 AS $$
-DECLARE
-    v_old_customer_id INT;
-    v_old_price DECIMAL(10,2);
 BEGIN
-    SELECT customer_id, price
-      INTO v_old_customer_id, v_old_price
-      FROM Lessons
-     WHERE lesson_id = p_lesson_id;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Lesson % does not exist', p_lesson_id;
-    END IF;
-
     UPDATE Lessons
        SET customer_id = p_customer_id,
            staff_id = p_staff_id,
@@ -276,18 +313,8 @@ BEGIN
            lesson_status_code = COALESCE(p_status_code, lesson_status_code)
      WHERE lesson_id = p_lesson_id;
 
-        IF v_old_customer_id = p_customer_id THEN
-                UPDATE Customers
-                     SET amount_outstanding = GREATEST(0, amount_outstanding + p_price - v_old_price)
-                 WHERE customer_id = p_customer_id;
-        ELSE
-                UPDATE Customers
-                     SET amount_outstanding = GREATEST(0, amount_outstanding - v_old_price)
-                 WHERE customer_id = v_old_customer_id;
-
-                UPDATE Customers
-                     SET amount_outstanding = amount_outstanding + p_price
-                 WHERE customer_id = p_customer_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Lesson % does not exist', p_lesson_id;
     END IF;
 END;
 $$;
@@ -426,6 +453,7 @@ $$;
 --    (staff signatures match the reordered parameters above) 
 GRANT EXECUTE ON FUNCTION fn_book_lesson(INT,INT,INT,DATE,TIME,DECIMAL)         TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_record_payment(INT,VARCHAR,DECIMAL,TEXT)           TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_update_payment(INT,TIMESTAMP,TIMESTAMP,VARCHAR,DECIMAL,TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_cancel_lesson(INT)                                 TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_add_customer(INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION fn_update_customer(INT,INT,VARCHAR,DATE,DATE,VARCHAR,VARCHAR,VARCHAR,VARCHAR) TO anon, authenticated;
